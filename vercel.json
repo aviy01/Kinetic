@@ -3,15 +3,7 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "vite",
-  "env": [
-    "VITE_SUPABASE_URL",
-    "VITE_SUPABASE_ANON_KEY",
-    "VITE_GOOGLE_CLIENT_ID",
-    "VITE_FOOD_API_KEY",
-    "VITE_FOOD_API_BASE_URL",
-    "VITE_APP_NAME",
-    "VITE_APP_VERSION"
-  ],
+ 
   "headers": [
     {
       "source": "/api/(.*)",
