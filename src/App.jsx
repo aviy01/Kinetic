@@ -24,16 +24,131 @@ import {
 // ─── Static Data ────────────────────────────────────────────────────────────
 
 const foodDatabase = [
-  { id: 1,  name: 'Chicken Breast (100g)', calories: 165, protein: 31,  carbs: 0,  fat: 3.6, fiber: 0   },
-  { id: 2,  name: 'Brown Rice (100g)',      calories: 111, protein: 2.6, carbs: 23, fat: 0.9, fiber: 1.8 },
-  { id: 3,  name: 'Banana (medium)',        calories: 89,  protein: 1.1, carbs: 23, fat: 0.3, fiber: 2.6 },
-  { id: 4,  name: 'Broccoli (100g)',        calories: 34,  protein: 2.8, carbs: 7,  fat: 0.4, fiber: 2.4 },
-  { id: 5,  name: 'Salmon (100g)',          calories: 208, protein: 20,  carbs: 0,  fat: 13,  fiber: 0   },
-  { id: 6,  name: 'Egg (large)',            calories: 78,  protein: 6.3, carbs: 0.6,fat: 5.3, fiber: 0   },
-  { id: 7,  name: 'Almonds (30g)',          calories: 164, protein: 6,   carbs: 6,  fat: 14,  fiber: 3.5 },
-  { id: 8,  name: 'Apple (medium)',         calories: 95,  protein: 0.5, carbs: 25, fat: 0.3, fiber: 4.4 },
-  { id: 9,  name: 'Sweet Potato (100g)',    calories: 86,  protein: 1.6, carbs: 20, fat: 0.1, fiber: 3   },
-  { id: 10, name: 'Greek Yogurt (100g)',    calories: 59,  protein: 10,  carbs: 3.3,fat: 0.4, fiber: 0   },
+  // ── Indian Staples & Rice Dishes ─────────────────────────────────────────
+  { id: 1,   name: 'Basmati Rice, cooked (100g)',       calories: 130, protein: 2.7, carbs: 28,  fat: 0.3, fiber: 0.4 },
+  { id: 2,   name: 'Brown Rice, cooked (100g)',          calories: 111, protein: 2.6, carbs: 23,  fat: 0.9, fiber: 1.8 },
+  { id: 3,   name: 'Jeera Rice (1 serving 150g)',        calories: 220, protein: 4,   carbs: 40,  fat: 5,   fiber: 0.5 },
+  { id: 4,   name: 'Biryani - Veg (1 plate 300g)',       calories: 400, protein: 9,   carbs: 65,  fat: 12,  fiber: 3   },
+  { id: 5,   name: 'Biryani - Chicken (1 plate 350g)',   calories: 490, protein: 28,  carbs: 58,  fat: 15,  fiber: 2   },
+  { id: 6,   name: 'Khichdi (1 bowl 200g)',              calories: 200, protein: 7,   carbs: 35,  fat: 4,   fiber: 3   },
+  { id: 7,   name: 'Pulao (1 serving 150g)',             calories: 210, protein: 4,   carbs: 38,  fat: 5,   fiber: 1.5 },
+
+  // ── Indian Breads ─────────────────────────────────────────────────────────
+  { id: 8,   name: 'Roti / Chapati (1 piece)',           calories: 71,  protein: 2.7, carbs: 14,  fat: 0.9, fiber: 1.9 },
+  { id: 9,   name: 'Whole Wheat Roti (1 piece)',         calories: 80,  protein: 3,   carbs: 15,  fat: 1,   fiber: 2.5 },
+  { id: 10,  name: 'Paratha - Plain (1 piece)',          calories: 160, protein: 3.5, carbs: 22,  fat: 6,   fiber: 2   },
+  { id: 11,  name: 'Paratha - Aloo (1 piece)',           calories: 200, protein: 4,   carbs: 28,  fat: 8,   fiber: 2.5 },
+  { id: 12,  name: 'Naan (1 piece)',                     calories: 262, protein: 8.7, carbs: 45,  fat: 5,   fiber: 1.7 },
+  { id: 13,  name: 'Puri (1 piece)',                     calories: 100, protein: 2,   carbs: 13,  fat: 4.5, fiber: 1   },
+  { id: 14,  name: 'Bhatura (1 piece)',                  calories: 190, protein: 4,   carbs: 27,  fat: 8,   fiber: 1   },
+  { id: 15,  name: 'Dosa - Plain (1 piece)',             calories: 120, protein: 3,   carbs: 22,  fat: 2.5, fiber: 1   },
+  { id: 16,  name: 'Masala Dosa (1 piece)',              calories: 230, protein: 5,   carbs: 35,  fat: 8,   fiber: 2   },
+  { id: 17,  name: 'Idli (1 piece)',                     calories: 39,  protein: 2,   carbs: 8,   fat: 0.2, fiber: 0.5 },
+  { id: 18,  name: 'Uttapam (1 piece)',                  calories: 107, protein: 3.5, carbs: 18,  fat: 2.5, fiber: 1.5 },
+
+  // ── Indian Curries & Gravies ──────────────────────────────────────────────
+  { id: 19,  name: 'Dal Tadka (1 bowl 200ml)',           calories: 170, protein: 10,  carbs: 22,  fat: 5,   fiber: 6   },
+  { id: 20,  name: 'Dal Makhani (1 bowl 200ml)',         calories: 220, protein: 10,  carbs: 24,  fat: 9,   fiber: 6   },
+  { id: 21,  name: 'Chana Masala (1 bowl 200g)',         calories: 210, protein: 11,  carbs: 32,  fat: 5,   fiber: 9   },
+  { id: 22,  name: 'Rajma (1 bowl 200g)',                calories: 220, protein: 13,  carbs: 35,  fat: 4,   fiber: 10  },
+  { id: 23,  name: 'Palak Paneer (1 bowl 200g)',         calories: 260, protein: 14,  carbs: 10,  fat: 18,  fiber: 3   },
+  { id: 24,  name: 'Paneer Butter Masala (1 bowl 200g)', calories: 340, protein: 14,  carbs: 14,  fat: 26,  fiber: 2   },
+  { id: 25,  name: 'Chicken Curry (1 bowl 200g)',        calories: 280, protein: 26,  carbs: 8,   fat: 16,  fiber: 1.5 },
+  { id: 26,  name: 'Butter Chicken (1 bowl 200g)',       calories: 320, protein: 25,  carbs: 12,  fat: 20,  fiber: 1   },
+  { id: 27,  name: 'Mutton Curry (1 bowl 200g)',         calories: 360, protein: 28,  carbs: 6,   fat: 24,  fiber: 1   },
+  { id: 28,  name: 'Fish Curry (1 bowl 200g)',           calories: 240, protein: 24,  carbs: 8,   fat: 13,  fiber: 1   },
+  { id: 29,  name: 'Egg Curry (2 eggs + gravy)',         calories: 250, protein: 16,  carbs: 10,  fat: 16,  fiber: 1.5 },
+  { id: 30,  name: 'Sambar (1 bowl 200ml)',              calories: 90,  protein: 4,   carbs: 14,  fat: 2,   fiber: 4   },
+  { id: 31,  name: 'Rasam (1 bowl 200ml)',               calories: 50,  protein: 2,   carbs: 8,   fat: 1,   fiber: 1   },
+
+  // ── Indian Snacks & Street Food ───────────────────────────────────────────
+  { id: 32,  name: 'Samosa (1 piece)',                   calories: 130, protein: 2.5, carbs: 16,  fat: 6.5, fiber: 1.5 },
+  { id: 33,  name: 'Vada Pav (1 piece)',                 calories: 290, protein: 6,   carbs: 44,  fat: 10,  fiber: 3   },
+  { id: 34,  name: 'Pav Bhaji (1 plate)',                calories: 380, protein: 9,   carbs: 55,  fat: 14,  fiber: 6   },
+  { id: 35,  name: 'Pani Puri (6 pieces)',               calories: 180, protein: 3,   carbs: 30,  fat: 5,   fiber: 2   },
+  { id: 36,  name: 'Bhel Puri (1 plate 150g)',           calories: 180, protein: 4,   carbs: 32,  fat: 4,   fiber: 3   },
+  { id: 37,  name: 'Aloo Tikki (1 piece)',               calories: 140, protein: 3,   carbs: 22,  fat: 5,   fiber: 2   },
+  { id: 38,  name: 'Dhokla (2 pieces 100g)',             calories: 130, protein: 5,   carbs: 22,  fat: 3,   fiber: 1.5 },
+  { id: 39,  name: 'Medu Vada (1 piece)',                calories: 100, protein: 3.5, carbs: 12,  fat: 4.5, fiber: 1.5 },
+  { id: 40,  name: 'Pakora (4 pieces 80g)',              calories: 200, protein: 5,   carbs: 22,  fat: 10,  fiber: 2   },
+
+  // ── Indian Breakfast ──────────────────────────────────────────────────────
+  { id: 41,  name: 'Poha (1 bowl 150g)',                 calories: 180, protein: 4,   carbs: 32,  fat: 4,   fiber: 2   },
+  { id: 42,  name: 'Upma (1 bowl 150g)',                 calories: 190, protein: 5,   carbs: 30,  fat: 5,   fiber: 2.5 },
+  { id: 43,  name: 'Halwa - Suji (1 bowl 100g)',         calories: 230, protein: 3,   carbs: 36,  fat: 8,   fiber: 0.5 },
+  { id: 44,  name: 'Besan Cheela (1 piece)',             calories: 120, protein: 6,   carbs: 14,  fat: 4,   fiber: 3   },
+  { id: 45,  name: 'Sabudana Khichdi (1 bowl 150g)',     calories: 300, protein: 3,   carbs: 55,  fat: 7,   fiber: 1   },
+
+  // ── Indian Dairy & Drinks ─────────────────────────────────────────────────
+  { id: 46,  name: 'Paneer (100g)',                      calories: 265, protein: 18,  carbs: 1.2, fat: 20,  fiber: 0   },
+  { id: 47,  name: 'Dahi / Curd (100g)',                 calories: 60,  protein: 3.5, carbs: 4,   fat: 3,   fiber: 0   },
+  { id: 48,  name: 'Lassi - Sweet (1 glass 250ml)',      calories: 200, protein: 6,   carbs: 30,  fat: 6,   fiber: 0   },
+  { id: 49,  name: 'Lassi - Salted (1 glass 250ml)',     calories: 120, protein: 6,   carbs: 12,  fat: 5,   fiber: 0   },
+  { id: 50,  name: 'Chai with Milk & Sugar (1 cup)',     calories: 60,  protein: 1.5, carbs: 9,   fat: 1.5, fiber: 0   },
+  { id: 51,  name: 'Masala Chai (1 cup)',                calories: 70,  protein: 2,   carbs: 10,  fat: 2,   fiber: 0   },
+  { id: 52,  name: 'Buttermilk / Chaas (1 glass 200ml)',calories: 40,  protein: 2,   carbs: 4,   fat: 1,   fiber: 0   },
+  { id: 53,  name: 'Milk - Full Fat (200ml)',            calories: 130, protein: 6.8, carbs: 9.6, fat: 7,   fiber: 0   },
+
+  // ── Indian Sweets & Desserts ──────────────────────────────────────────────
+  { id: 54,  name: 'Gulab Jamun (1 piece)',              calories: 150, protein: 2,   carbs: 25,  fat: 5,   fiber: 0   },
+  { id: 55,  name: 'Jalebi (2 pieces 50g)',              calories: 150, protein: 1.5, carbs: 30,  fat: 3.5, fiber: 0   },
+  { id: 56,  name: 'Kheer (1 bowl 150g)',                calories: 180, protein: 5,   carbs: 28,  fat: 5.5, fiber: 0.5 },
+  { id: 57,  name: 'Ladoo - Besan (1 piece)',            calories: 180, protein: 4,   carbs: 22,  fat: 9,   fiber: 1   },
+
+  // ── Pulses & Legumes ──────────────────────────────────────────────────────
+  { id: 58,  name: 'Moong Dal, cooked (100g)',           calories: 105, protein: 7,   carbs: 19,  fat: 0.4, fiber: 7   },
+  { id: 59,  name: 'Masoor Dal, cooked (100g)',          calories: 116, protein: 9,   carbs: 20,  fat: 0.4, fiber: 8   },
+  { id: 60,  name: 'Chana Dal, cooked (100g)',           calories: 164, protein: 9,   carbs: 27,  fat: 2.6, fiber: 8   },
+  { id: 61,  name: 'Kidney Beans / Rajma (100g)',        calories: 127, protein: 8.7, carbs: 22,  fat: 0.5, fiber: 6   },
+  { id: 62,  name: 'Black Chana, cooked (100g)',         calories: 164, protein: 9,   carbs: 27,  fat: 2.6, fiber: 8   },
+
+  // ── Vegetables (Indian Cooking) ───────────────────────────────────────────
+  { id: 63,  name: 'Aloo Gobi (1 bowl 150g)',            calories: 130, protein: 3,   carbs: 18,  fat: 5,   fiber: 4   },
+  { id: 64,  name: 'Bhindi Masala (1 bowl 150g)',        calories: 110, protein: 3,   carbs: 12,  fat: 5,   fiber: 4   },
+  { id: 65,  name: 'Baingan Bharta (1 bowl 150g)',       calories: 100, protein: 2.5, carbs: 12,  fat: 4.5, fiber: 4   },
+  { id: 66,  name: 'Mixed Veg Sabzi (1 bowl 150g)',      calories: 120, protein: 3,   carbs: 14,  fat: 5,   fiber: 4   },
+  { id: 67,  name: 'Spinach / Palak (100g raw)',         calories: 23,  protein: 2.9, carbs: 3.6, fat: 0.4, fiber: 2.2 },
+  { id: 68,  name: 'Tomato (1 medium)',                  calories: 22,  protein: 1,   carbs: 4.8, fat: 0.2, fiber: 1.5 },
+  { id: 69,  name: 'Onion (1 medium)',                   calories: 44,  protein: 1.2, carbs: 10,  fat: 0.1, fiber: 1.7 },
+  { id: 70,  name: 'Potato (1 medium 150g)',             calories: 116, protein: 2.5, carbs: 26,  fat: 0.1, fiber: 2.2 },
+
+  // ── Fruits (Common in India) ──────────────────────────────────────────────
+  { id: 71,  name: 'Mango (1 medium 200g)',              calories: 134, protein: 1,   carbs: 35,  fat: 0.6, fiber: 3   },
+  { id: 72,  name: 'Banana (1 medium)',                  calories: 89,  protein: 1.1, carbs: 23,  fat: 0.3, fiber: 2.6 },
+  { id: 73,  name: 'Apple (1 medium)',                   calories: 95,  protein: 0.5, carbs: 25,  fat: 0.3, fiber: 4.4 },
+  { id: 74,  name: 'Papaya (100g)',                      calories: 43,  protein: 0.5, carbs: 11,  fat: 0.3, fiber: 1.7 },
+  { id: 75,  name: 'Guava (1 medium)',                   calories: 68,  protein: 2.6, carbs: 14,  fat: 1,   fiber: 5.4 },
+  { id: 76,  name: 'Watermelon (100g)',                  calories: 30,  protein: 0.6, carbs: 7.6, fat: 0.2, fiber: 0.4 },
+  { id: 77,  name: 'Orange (1 medium)',                  calories: 62,  protein: 1.2, carbs: 15,  fat: 0.2, fiber: 3.1 },
+  { id: 78,  name: 'Pomegranate (100g)',                 calories: 83,  protein: 1.7, carbs: 19,  fat: 1.2, fiber: 4   },
+
+  // ── Nuts & Seeds ─────────────────────────────────────────────────────────
+  { id: 79,  name: 'Almonds (30g / ~20 pieces)',         calories: 164, protein: 6,   carbs: 6,   fat: 14,  fiber: 3.5 },
+  { id: 80,  name: 'Cashews (30g)',                      calories: 163, protein: 4.3, carbs: 9,   fat: 13,  fiber: 0.9 },
+  { id: 81,  name: 'Peanuts (30g)',                      calories: 166, protein: 7.5, carbs: 6,   fat: 14,  fiber: 2.5 },
+  { id: 82,  name: 'Walnuts (30g)',                      calories: 196, protein: 4.6, carbs: 4,   fat: 19,  fiber: 2   },
+  { id: 83,  name: 'Flaxseeds (1 tbsp 10g)',             calories: 55,  protein: 1.9, carbs: 3,   fat: 4.3, fiber: 2.8 },
+
+  // ── Proteins ──────────────────────────────────────────────────────────────
+  { id: 84,  name: 'Chicken Breast (100g)',              calories: 165, protein: 31,  carbs: 0,   fat: 3.6, fiber: 0   },
+  { id: 85,  name: 'Chicken Leg (100g)',                 calories: 232, protein: 26,  carbs: 0,   fat: 14,  fiber: 0   },
+  { id: 86,  name: 'Egg (1 whole large)',                calories: 78,  protein: 6.3, carbs: 0.6, fat: 5.3, fiber: 0   },
+  { id: 87,  name: 'Egg White (1 large)',                calories: 17,  protein: 3.6, carbs: 0.2, fat: 0.1, fiber: 0   },
+  { id: 88,  name: 'Salmon (100g)',                      calories: 208, protein: 20,  carbs: 0,   fat: 13,  fiber: 0   },
+  { id: 89,  name: 'Tuna, canned (100g)',                calories: 116, protein: 26,  carbs: 0,   fat: 1,   fiber: 0   },
+  { id: 90,  name: 'Greek Yogurt (100g)',                calories: 59,  protein: 10,  carbs: 3.3, fat: 0.4, fiber: 0   },
+  { id: 91,  name: 'Whey Protein (1 scoop 30g)',         calories: 120, protein: 24,  carbs: 3,   fat: 1.5, fiber: 0   },
+
+  // ── Fast Food & Common Outside Food ───────────────────────────────────────
+  { id: 92,  name: 'Burger - Veg (1 piece)',             calories: 310, protein: 8,   carbs: 42,  fat: 12,  fiber: 3   },
+  { id: 93,  name: 'Burger - Chicken (1 piece)',         calories: 380, protein: 20,  carbs: 38,  fat: 17,  fiber: 2   },
+  { id: 94,  name: 'Pizza - Veg slice (1 slice)',        calories: 250, protein: 9,   carbs: 33,  fat: 9,   fiber: 2   },
+  { id: 95,  name: 'French Fries (medium 120g)',         calories: 365, protein: 4,   carbs: 48,  fat: 17,  fiber: 3.8 },
+  { id: 96,  name: 'White Bread (1 slice)',              calories: 79,  protein: 2.7, carbs: 15,  fat: 1,   fiber: 0.6 },
+  { id: 97,  name: 'Maggi Noodles (1 pack 70g)',         calories: 310, protein: 7,   carbs: 43,  fat: 12,  fiber: 1   },
+  { id: 98,  name: 'Oats, cooked (100g)',                calories: 71,  protein: 2.5, carbs: 12,  fat: 1.5, fiber: 1.7 },
+  { id: 99,  name: 'Sweet Potato (100g)',                calories: 86,  protein: 1.6, carbs: 20,  fat: 0.1, fiber: 3   },
+  { id: 100, name: 'Broccoli (100g)',                    calories: 34,  protein: 2.8, carbs: 7,   fat: 0.4, fiber: 2.4 },
 ];
 
 const exerciseDatabase = [
@@ -109,6 +224,7 @@ const CaloryTrackerPro = () => {
   // ── Food log ──────────────────────────────────────────────────────────────
   const [foodItems,    setFoodItems]    = useState([]);
   const [foodSearch,   setFoodSearch]   = useState('');
+  const [foodCategory, setFoodCategory] = useState('All');
   const [selectedFood, setSelectedFood] = useState(null);
   const [foodQuantity, setFoodQuantity] = useState('');
 
@@ -685,13 +801,35 @@ const CaloryTrackerPro = () => {
           <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold text-gray-800">Daily Calories</h2>
-              <input
-                type="number"
-                value={dailyData.targetCalories}
-                onChange={e => setDailyData(prev => ({ ...prev, targetCalories: parseInt(e.target.value) || 2000 }))}
-                className="w-24 px-3 py-1 border border-teal-300 rounded-lg text-sm"
-                placeholder="Target"
-              />
+              <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-3 py-2 shadow-sm">
+                <span className="text-xs font-semibold text-teal-500 uppercase tracking-widest whitespace-nowrap">🎯 Set Goal</span>
+                <div className="w-px h-4 bg-teal-200" />
+                <input
+                  type="number"
+                  value={dailyData.targetCalories === 0 ? '' : dailyData.targetCalories}
+                  onChange={e => {
+                    const raw = e.target.value;
+                    if (raw === '' || raw === '-') {
+                      setDailyData(prev => ({ ...prev, targetCalories: 0 }));
+                    } else {
+                      const parsed = parseInt(raw, 10);
+                      if (!isNaN(parsed) && parsed > 0) {
+                        setDailyData(prev => ({ ...prev, targetCalories: parsed }));
+                      }
+                    }
+                  }}
+                  onBlur={e => {
+                    const val = parseInt(e.target.value, 10);
+                    if (!val || val <= 0) {
+                      setDailyData(prev => ({ ...prev, targetCalories: 2000 }));
+                    }
+                  }}
+                  min={1}
+                  className="w-14 text-sm font-bold text-teal-700 text-center bg-transparent focus:outline-none placeholder-teal-300"
+                  placeholder="2000"
+                />
+                <span className="text-xs font-medium text-teal-400">kcal</span>
+              </div>
             </div>
 
             <div className="relative w-32 h-32 mx-auto mb-4">
@@ -730,6 +868,58 @@ const CaloryTrackerPro = () => {
             </div>
           </div>
 
+          {/* Recently Added Food */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-gray-800">Recently Added Food</h2>
+              <button
+                onClick={() => setCurrentTab('log-food')}
+                className="text-xs font-semibold text-teal-600 hover:text-teal-700 bg-teal-50 px-3 py-1.5 rounded-lg"
+              >
+                + Add Food
+              </button>
+            </div>
+
+            {foodItems.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="text-4xl mb-3">🍽️</div>
+                <p className="text-sm font-semibold text-gray-500">No food logged yet</p>
+                <p className="text-xs text-gray-400 mt-1">Tap &quot;+ Add Food&quot; to start tracking</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {[...foodItems].reverse().slice(0, 4).map(food => (
+                  <div
+                    key={food.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border-l-4 border-teal-400"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-teal-100 flex items-center justify-center text-lg">
+                        🥗
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800 leading-tight">{food.name}</p>
+                        <p className="text-xs text-gray-400">×{food.quantity} serving</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-teal-600">{Math.round(food.calories)}</p>
+                      <p className="text-xs text-gray-400">kcal</p>
+                    </div>
+                  </div>
+                ))}
+                {foodItems.length > 4 && (
+                  <button
+                    onClick={() => setCurrentTab('log-food')}
+                    className="w-full text-center text-xs font-semibold text-teal-600 hover:text-teal-700 py-2"
+                  >
+                    View all {foodItems.length} items →
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Water intake */}
           <div className="bg-white rounded-2xl p-6 shadow-sm">
             <h2 className="text-lg font-bold text-gray-800 mb-4">Water Intake</h2>
@@ -764,69 +954,143 @@ const CaloryTrackerPro = () => {
   };
 
   // ── Log Food ──────────────────────────────────────────────────────────────
-  const renderLogFood = () => (
+  const FOOD_CATEGORIES = ['All', 'Rice & Breads', 'Curries', 'Snacks', 'Breakfast', 'Dairy & Drinks', 'Fruits', 'Proteins', 'Sweets', 'Other'];
+
+  const getCategoryItems = (cat) => {
+    if (cat === 'All') return foodDatabase;
+    const map = {
+      'Rice & Breads':  [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],
+      'Curries':        [19,20,21,22,23,24,25,26,27,28,29,30,31],
+      'Snacks':         [32,33,34,35,36,37,38,39,40],
+      'Breakfast':      [41,42,43,44,45],
+      'Dairy & Drinks': [46,47,48,49,50,51,52,53],
+      'Sweets':         [54,55,56,57],
+      'Fruits':         [71,72,73,74,75,76,77,78],
+      'Proteins':       [84,85,86,87,88,89,90,91],
+      'Other':          [58,59,60,61,62,63,64,65,66,67,68,69,70,79,80,81,82,83,92,93,94,95,96,97,98,99,100],
+    };
+    return foodDatabase.filter(f => (map[cat] || []).includes(f.id));
+  };
+
+  const renderLogFood = () => {
+    const filteredFoods = getCategoryItems(foodCategory).filter(f =>
+      f.name.toLowerCase().includes(foodSearch.toLowerCase())
+    );
+    const selectedFoodItem = foodDatabase.find(f => f.id === selectedFood);
+
+    return (
     <div className="min-h-screen bg-gray-50 pb-24">
       <div style={{ background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)' }} className="text-white p-6 pt-8">
         <h1 className="text-2xl font-bold">Log Food 🍎</h1>
-        <p className="text-teal-50">Track your daily nutrition</p>
+        <p className="text-teal-50">100+ Indian &amp; global foods</p>
       </div>
 
       <div className="px-6 py-6">
-        <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-          <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Search food…"
-                value={foodSearch}
-                onChange={e => setFoodSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-              />
-            </div>
+        <div className="bg-white rounded-2xl p-5 shadow-sm mb-6">
 
-            {foodSearch && (
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {foodDatabase
-                  .filter(f => f.name.toLowerCase().includes(foodSearch.toLowerCase()))
-                  .map(food => (
-                    <button
-                      key={food.id}
-                      onClick={() => { setSelectedFood(food.id); setFoodSearch(''); }}
-                      className="w-full text-left p-3 bg-teal-50 hover:bg-teal-100 rounded-lg transition border-l-4 border-teal-500"
-                    >
-                      <p className="font-semibold text-gray-800">{food.name}</p>
-                      <p className="text-sm text-gray-600">{food.calories} cal</p>
-                    </button>
-                  ))}
-              </div>
-            )}
+          {/* Search bar */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="Search roti, biryani, dal, chicken…"
+              value={foodSearch}
+              onChange={e => { setFoodSearch(e.target.value); setFoodCategory('All'); }}
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-teal-500 bg-gray-50 text-sm"
+            />
+          </div>
 
-            {selectedFood && (
-              <>
-                <div className="bg-teal-50 p-3 rounded-lg border-l-4 border-teal-500">
-                  <p className="font-semibold text-gray-800">
-                    {foodDatabase.find(f => f.id === selectedFood)?.name}
-                  </p>
+          {/* Category pills */}
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+            {FOOD_CATEGORIES.map(cat => (
+              <button
+                key={cat}
+                onClick={() => { setFoodCategory(cat); setFoodSearch(''); setSelectedFood(null); }}
+                className="whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-semibold transition"
+                style={{
+                  background: foodCategory === cat ? '#0D9488' : '#F0FDFA',
+                  color:      foodCategory === cat ? '#ffffff' : '#0D9488',
+                  border:     foodCategory === cat ? '1.5px solid #0D9488' : '1.5px solid #99f6e4',
+                }}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Selected food card */}
+          {selectedFoodItem && (
+            <div className="mb-4 p-4 bg-teal-50 rounded-xl border border-teal-200">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <p className="font-bold text-gray-800 text-sm leading-snug">{selectedFoodItem.name}</p>
+                  <p className="text-xs text-teal-600 mt-0.5">{selectedFoodItem.calories} kcal per serving</p>
                 </div>
+                <button onClick={() => setSelectedFood(null)} className="text-gray-400 hover:text-gray-600 ml-2">
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="grid grid-cols-4 gap-2 mb-3">
+                {[
+                  { label: 'Protein', val: selectedFoodItem.protein, color: 'text-teal-700', bg: 'bg-teal-100' },
+                  { label: 'Carbs',   val: selectedFoodItem.carbs,   color: 'text-orange-700', bg: 'bg-orange-100' },
+                  { label: 'Fat',     val: selectedFoodItem.fat,     color: 'text-red-700',    bg: 'bg-red-100'    },
+                  { label: 'Fiber',   val: selectedFoodItem.fiber,   color: 'text-blue-700',   bg: 'bg-blue-100'   },
+                ].map(({ label, val, color, bg }) => (
+                  <div key={label} className={`${bg} rounded-lg p-2 text-center`}>
+                    <p className="text-xs text-gray-500">{label}</p>
+                    <p className={`text-xs font-bold ${color}`}>{val}g</p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2">
                 <input
                   type="number"
-                  placeholder="Quantity (1 = full serving)"
+                  placeholder="Qty (1 = 1 serving)"
                   value={foodQuantity}
                   onChange={e => setFoodQuantity(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
+                  className="flex-1 px-3 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:border-teal-500 text-sm"
                 />
                 <button
                   onClick={handleAddFood}
-                  className="w-full py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-semibold hover:shadow-lg transition flex items-center justify-center gap-2"
+                  className="px-5 py-2.5 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition flex items-center gap-1.5 text-sm"
                 >
-                  <Plus size={20} /> Add Food
+                  <Plus size={16} /> Add
                 </button>
-              </>
+              </div>
+            </div>
+          )}
+
+          {/* Food list */}
+          <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+            {filteredFoods.length === 0 ? (
+              <p className="text-center text-sm text-gray-400 py-6">No foods found. Try a different search.</p>
+            ) : (
+              filteredFoods.map(food => (
+                <button
+                  key={food.id}
+                  onClick={() => { setSelectedFood(food.id); setFoodSearch(''); setFoodQuantity(''); }}
+                  className={`w-full text-left p-3 rounded-xl transition border ${
+                    selectedFood === food.id
+                      ? 'bg-teal-50 border-teal-400'
+                      : 'bg-gray-50 border-gray-100 hover:bg-teal-50 hover:border-teal-300'
+                  }`}
+                >
+                  <div className="flex justify-between items-center">
+                    <p className="font-semibold text-gray-800 text-sm">{food.name}</p>
+                    <div className="text-right ml-2 shrink-0">
+                      <p className="text-sm font-bold text-teal-600">{food.calories}</p>
+                      <p className="text-xs text-gray-400">kcal</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-0.5">P: {food.protein}g · C: {food.carbs}g · F: {food.fat}g</p>
+                </button>
+              ))
             )}
           </div>
         </div>
 
+        {/* Today's logged meals */}
         {foodItems.length > 0 && (
           <div className="bg-white rounded-2xl p-6 shadow-sm">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Today's Meals</h3>
@@ -837,11 +1101,11 @@ const CaloryTrackerPro = () => {
                   className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border-l-4 border-teal-500"
                 >
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-800">{food.name} × {food.quantity}</p>
-                    <p className="text-sm text-gray-600">{Math.round(food.calories)} cal</p>
+                    <p className="font-semibold text-gray-800 text-sm">{food.name} × {food.quantity}</p>
+                    <p className="text-xs text-gray-500">{Math.round(food.calories)} kcal · P: {Math.round(food.protein)}g · C: {Math.round(food.carbs)}g</p>
                   </div>
-                  <button onClick={() => handleRemoveFood(food.id)} className="text-red-500 hover:text-red-700">
-                    <X size={20} />
+                  <button onClick={() => handleRemoveFood(food.id)} className="text-red-400 hover:text-red-600 ml-2">
+                    <X size={18} />
                   </button>
                 </div>
               ))}
@@ -850,7 +1114,8 @@ const CaloryTrackerPro = () => {
         )}
       </div>
     </div>
-  );
+    );
+  };
 
   // ── Progress ──────────────────────────────────────────────────────────────
   const renderProgress = () => {
