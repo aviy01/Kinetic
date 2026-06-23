@@ -1001,7 +1001,7 @@ const CaloryTrackerPro = () => {
           </div>
 
           {/* Category pills */}
-          <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {FOOD_CATEGORIES.map(cat => (
               <button
                 key={cat}
