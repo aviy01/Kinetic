@@ -35,12 +35,3 @@ button {
   -webkit-user-select: text;
   user-select: text;
 }
-
-/* Hide scrollbar cross-browser */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
