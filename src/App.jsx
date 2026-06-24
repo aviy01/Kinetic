@@ -760,50 +760,67 @@ const CaloryTrackerPro = () => {
   const renderHome = () => {
     const caloriePercentage = Math.min((dailyData.consumedCalories / dailyData.targetCalories) * 100, 100);
     const waterPercentage   = Math.min((dailyData.waterIntake / dailyData.waterTarget) * 100, 100);
-    const CIRCUMFERENCE     = 2 * Math.PI * 54; // ≈ 339.3
+    const remaining         = Math.max(dailyData.targetCalories - dailyData.consumedCalories, 0);
+    const burned            = dailyData.burnedCalories || 0;
+    const net               = Math.round(dailyData.consumedCalories - burned);
+    const CIRCUMFERENCE     = 2 * Math.PI * 52;
+    const today             = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+    const hour              = new Date().getHours();
+    const greeting          = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
+    const greetingEmoji     = hour < 12 ? '🌤️' : hour < 17 ? '☀️' : '🌙';
+    const tips = [
+      'Eating slowly helps your brain register fullness — try putting your fork down between bites.',
+      'Drinking water before meals can reduce calorie intake significantly.',
+      'Protein keeps you full longer. Ensure every meal has a good protein source.',
+      'Colorful plates mean more nutrients. Aim for 3 different colored foods per meal.',
+      'Short walks after meals improve blood sugar and digestion.',
+    ];
 
     return (
-      <div className="min-h-screen bg-gray-50 pb-24">
-        {/* Header */}
-        <div style={{ background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)' }} className="text-white p-6 pt-8">
-          <div className="flex justify-between items-center mb-2">
-            <h1 className="text-2xl font-bold">Hey, {user.name}! 👋</h1>
-            <button
-              onClick={() => setShowProfileMenu(v => !v)}
-              className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30"
-            >
-              <Menu size={24} />
-            </button>
+      <div className="min-h-screen pb-28" style={{ backgroundColor: '#F0F4F8' }}>
+
+        {/* ── HEADER ── */}
+        <div className="relative px-5 pt-10 pb-24 overflow-hidden"
+          style={{ background: 'linear-gradient(145deg, #0D9488 0%, #0F766E 50%, #134E4A 100%)' }}>
+          {/* decorative blobs */}
+          <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }} />
+          <div className="absolute top-16 -right-4 w-28 h-28 rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }} />
+          <div className="absolute -bottom-6 -left-6 w-36 h-36 rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }} />
+
+          <div className="relative z-10 flex justify-between items-start">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">{greetingEmoji}</span>
+                <p className="text-teal-200 text-xs font-semibold uppercase tracking-widest">{today}</p>
+              </div>
+              <h1 className="text-2xl font-extrabold text-white leading-tight">{greeting},</h1>
+              <h2 className="text-3xl font-black text-white leading-tight">{user.name || 'Friend'}</h2>
+              <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full"
+                style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)' }}>
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                <p className="text-teal-100 text-xs font-medium">
+                  {caloriePercentage < 50 ? 'Great start today!' : caloriePercentage < 90 ? 'Almost at your goal!' : 'Goal achieved! 🎉'}
+                </p>
+              </div>
+            </div>
           </div>
-          <p className="text-teal-50">Let's crush your goals today!</p>
         </div>
 
-        {/* Profile dropdown */}
-        {showProfileMenu && (
-          <div className="fixed top-16 right-6 bg-white rounded-lg shadow-2xl z-50 w-48">
-            <button
-              onClick={() => { setCurrentTab('profile'); setShowProfileMenu(false); }}
-              className="w-full text-left px-4 py-3 hover:bg-teal-50 border-b font-semibold text-gray-700"
-            >
-              <User className="inline mr-2" size={18} /> Profile
-            </button>
-            <button
-              onClick={() => setAuthStep('login')}
-              className="w-full text-left px-4 py-3 hover:bg-teal-50 text-red-600 font-semibold"
-            >
-              <LogOut className="inline mr-2" size={18} /> Logout
-            </button>
-          </div>
-        )}
+        <div className="px-4 relative z-10" style={{ marginTop: '-72px' }}>
 
-        {/* Calorie ring */}
-        <div className="px-6 py-6">
-          <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold text-gray-800">Daily Calories</h2>
-              <div className="flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-3 py-2 shadow-sm">
-                <span className="text-xs font-semibold text-teal-500 uppercase tracking-widest whitespace-nowrap">🎯 Set Goal</span>
-                <div className="w-px h-4 bg-teal-200" />
+          {/* ── HERO CALORIE CARD ── */}
+          <div className="rounded-3xl mb-4 overflow-hidden"
+            style={{ background: 'white', boxShadow: '0 8px 32px rgba(13,148,136,0.13)' }}>
+
+            {/* Top bar with goal setter */}
+            <div className="flex items-center justify-between px-5 pt-5 pb-3"
+              style={{ borderBottom: '1px solid #F1F5F9' }}>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Calorie Summary</p>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
+                style={{ background: '#F0FDF9', border: '1.5px solid #99F6E4' }}>
+                <span className="text-sm">🎯</span>
+                <span className="text-xs font-semibold" style={{ color: '#5EEAD4' }}>Set Goal</span>
+                <div style={{ width: '1px', height: '14px', background: '#99F6E4' }} />
                 <input
                   type="number"
                   value={dailyData.targetCalories === 0 ? '' : dailyData.targetCalories}
@@ -813,106 +830,234 @@ const CaloryTrackerPro = () => {
                       setDailyData(prev => ({ ...prev, targetCalories: 0 }));
                     } else {
                       const parsed = parseInt(raw, 10);
-                      if (!isNaN(parsed) && parsed > 0) {
-                        setDailyData(prev => ({ ...prev, targetCalories: parsed }));
-                      }
+                      if (!isNaN(parsed) && parsed > 0) setDailyData(prev => ({ ...prev, targetCalories: parsed }));
                     }
                   }}
                   onBlur={e => {
                     const val = parseInt(e.target.value, 10);
-                    if (!val || val <= 0) {
-                      setDailyData(prev => ({ ...prev, targetCalories: 2000 }));
-                    }
+                    if (!val || val <= 0) setDailyData(prev => ({ ...prev, targetCalories: 2000 }));
                   }}
                   min={1}
-                  className="w-14 text-sm font-bold text-teal-700 text-center bg-transparent focus:outline-none placeholder-teal-300"
+                  className="w-14 text-xs font-bold text-center bg-transparent focus:outline-none"
+                  style={{ color: '#0D9488' }}
                   placeholder="2000"
                 />
-                <span className="text-xs font-medium text-teal-400">kcal</span>
+                <span className="text-xs font-semibold" style={{ color: '#5EEAD4' }}>kcal</span>
               </div>
             </div>
 
-            <div className="relative w-32 h-32 mx-auto mb-4">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
-                <circle cx="60" cy="60" r="54" fill="none" stroke="#E5E7EB" strokeWidth="8" />
-                <circle
-                  cx="60" cy="60" r="54"
-                  fill="none" stroke="#14B8A6" strokeWidth="8"
-                  strokeDasharray={`${(caloriePercentage / 100) * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <p className="text-2xl font-bold text-gray-800">{Math.round(dailyData.consumedCalories)}</p>
-                <p className="text-xs text-gray-500">/ {dailyData.targetCalories}</p>
+            {/* Ring + stats */}
+            <div className="flex items-center gap-4 px-5 py-5">
+              {/* Donut ring */}
+              <div className="relative shrink-0" style={{ width: 120, height: 120 }}>
+                <svg width="120" height="120" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="#F1F5F9" strokeWidth="10" />
+                  <circle cx="60" cy="60" r="52" fill="none"
+                    stroke={caloriePercentage >= 100 ? '#EF4444' : 'url(#ringGrad)'}
+                    strokeWidth="10"
+                    strokeDasharray={`${(caloriePercentage / 100) * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
+                    strokeLinecap="round"
+                    style={{ transition: 'stroke-dasharray 0.8s cubic-bezier(.4,0,.2,1)' }}
+                  />
+                  <defs>
+                    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#2DD4BF" />
+                      <stop offset="100%" stopColor="#0D9488" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <p className="text-2xl font-black leading-none" style={{ color: caloriePercentage >= 100 ? '#EF4444' : '#0D9488' }}>
+                    {Math.round(caloriePercentage)}%
+                  </p>
+                  <p className="text-xs text-gray-400 font-medium">of goal</p>
+                </div>
+              </div>
+
+              {/* Stats column */}
+              <div className="flex-1 space-y-2.5">
+                {[
+                  { label: 'Consumed',  val: Math.round(dailyData.consumedCalories), color: '#0D9488', bg: '#F0FDF9', icon: '🍽️' },
+                  { label: 'Remaining', val: remaining,                               color: remaining === 0 ? '#EF4444' : '#F97316', bg: remaining === 0 ? '#FEF2F2' : '#FFF7ED', icon: '⚡' },
+                  { label: 'Goal',      val: dailyData.targetCalories,               color: '#6366F1', bg: '#EEF2FF', icon: '🎯' },
+                ].map(s => (
+                  <div key={s.label} className="flex items-center justify-between px-3 py-2 rounded-xl"
+                    style={{ background: s.bg }}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">{s.icon}</span>
+                      <p className="text-xs font-semibold text-gray-500">{s.label}</p>
+                    </div>
+                    <p className="text-sm font-extrabold" style={{ color: s.color }}>{s.val} <span className="text-xs font-medium text-gray-400">kcal</span></p>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-3 text-center">
-              <div className="bg-teal-50 rounded-lg p-2">
-                <p className="text-xs text-gray-600">Protein</p>
-                <p className="text-sm font-bold text-teal-600">{Math.round(dailyData.protein)}g</p>
+            {/* Progress bar */}
+            <div className="px-5 pb-1">
+              <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: '#F1F5F9' }}>
+                <div className="h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${caloriePercentage}%`,
+                    background: caloriePercentage >= 100
+                      ? 'linear-gradient(90deg,#F97316,#EF4444)'
+                      : 'linear-gradient(90deg,#2DD4BF,#0D9488)'
+                  }} />
               </div>
-              <div className="bg-orange-50 rounded-lg p-2">
-                <p className="text-xs text-gray-600">Carbs</p>
-                <p className="text-sm font-bold text-orange-600">{Math.round(dailyData.carbs)}g</p>
-              </div>
-              <div className="bg-red-50 rounded-lg p-2">
-                <p className="text-xs text-gray-600">Fat</p>
-                <p className="text-sm font-bold text-red-600">{Math.round(dailyData.fat)}g</p>
-              </div>
-              <div className="bg-blue-50 rounded-lg p-2">
-                <p className="text-xs text-gray-600">Fiber</p>
-                <p className="text-sm font-bold text-blue-600">{Math.round(dailyData.fiber)}g</p>
-              </div>
+            </div>
+
+            {/* Macro strip */}
+            <div className="grid grid-cols-4 mt-3" style={{ borderTop: '1px solid #F8FAFC' }}>
+              {[
+                { label: 'Protein', val: Math.round(dailyData.protein), color: '#0D9488', bg: '#F0FDF9', bar: '#0D9488' },
+                { label: 'Carbs',   val: Math.round(dailyData.carbs),   color: '#F97316', bg: '#FFF7ED', bar: '#F97316' },
+                { label: 'Fat',     val: Math.round(dailyData.fat),     color: '#EF4444', bg: '#FEF2F2', bar: '#EF4444' },
+                { label: 'Fiber',   val: Math.round(dailyData.fiber),   color: '#6366F1', bg: '#EEF2FF', bar: '#6366F1' },
+              ].map((m, i) => (
+                <div key={m.label}
+                  className={`flex flex-col items-center py-3 ${i < 3 ? 'border-r' : ''}`}
+                  style={{ background: m.bg, borderColor: '#F1F5F9' }}>
+                  <p className="text-base font-black" style={{ color: m.color }}>{m.val}<span className="text-xs font-semibold">g</span></p>
+                  <p className="text-xs text-gray-400 font-medium mt-0.5">{m.label}</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Recently Added Food */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
+          {/* ── NUTRITION BREAKDOWN (bar chart style) ── */}
+          <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Macros</p>
+            <p className="text-lg font-extrabold text-gray-800 mb-4">Nutrition Breakdown</p>
+            {[
+              { label: 'Protein', val: Math.round(dailyData.protein), max: 150, color: '#0D9488', bg: '#F0FDF9', unit: 'g' },
+              { label: 'Carbs',   val: Math.round(dailyData.carbs),   max: 300, color: '#F97316', bg: '#FFF7ED', unit: 'g' },
+              { label: 'Fat',     val: Math.round(dailyData.fat),     max: 80,  color: '#EF4444', bg: '#FEF2F2', unit: 'g' },
+              { label: 'Fiber',   val: Math.round(dailyData.fiber),   max: 38,  color: '#6366F1', bg: '#EEF2FF', unit: 'g' },
+            ].map(m => (
+              <div key={m.label} className="mb-3 last:mb-0">
+                <div className="flex justify-between items-center mb-1">
+                  <p className="text-xs font-semibold text-gray-600">{m.label}</p>
+                  <p className="text-xs font-bold" style={{ color: m.color }}>{m.val}{m.unit} <span className="text-gray-300 font-normal">/ {m.max}{m.unit}</span></p>
+                </div>
+                <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: m.bg }}>
+                  <div className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${Math.min((m.val / m.max) * 100, 100)}%`, background: m.color }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── WATER INTAKE ── */}
+          <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Hydration</p>
+                <p className="text-lg font-extrabold text-gray-800">Water Intake</p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-black" style={{ color: '#3B82F6' }}>{dailyData.waterIntake}<span className="text-sm font-semibold text-gray-400">ml</span></p>
+                <p className="text-xs text-gray-400">of {dailyData.waterTarget}ml</p>
+              </div>
+            </div>
+
+            {/* Animated wave-style bar */}
+            <div className="relative w-full h-5 rounded-full overflow-hidden mb-3" style={{ background: '#EFF6FF' }}>
+              <div className="h-full rounded-full transition-all duration-700"
+                style={{ width: `${waterPercentage}%`, background: 'linear-gradient(90deg,#93C5FD,#3B82F6)' }} />
+              <p className="absolute inset-0 flex items-center justify-center text-xs font-bold"
+                style={{ color: waterPercentage > 50 ? 'white' : '#3B82F6' }}>
+                {Math.round(waterPercentage)}%
+              </p>
+            </div>
+
+            {/* Glass indicators */}
+            <div className="flex gap-1.5 mb-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="flex-1 rounded-lg transition-all duration-300 flex items-end justify-center pb-0.5"
+                  style={{
+                    height: 28,
+                    background: i < Math.floor(dailyData.waterIntake / (dailyData.waterTarget / 8))
+                      ? 'linear-gradient(180deg,#60A5FA,#3B82F6)'
+                      : '#EFF6FF',
+                    border: '1px solid #BFDBFE'
+                  }}>
+                  {i < Math.floor(dailyData.waterIntake / (dailyData.waterTarget / 8)) && (
+                    <span style={{ fontSize: 8, color: 'white', fontWeight: 700 }}>💧</span>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              {[150, 250, 500].map(ml => (
+                <button key={ml}
+                  onClick={() => setDailyData(prev => ({ ...prev, waterIntake: Math.min(prev.waterIntake + ml, prev.waterTarget) }))}
+                  className="py-2.5 rounded-xl text-sm font-bold transition active:scale-95 flex items-center justify-center gap-1"
+                  style={{ background: '#EFF6FF', color: '#3B82F6', border: '1.5px solid #BFDBFE' }}>
+                  💧 +{ml}ml
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ── RECENT FOODS ── */}
+          <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold text-gray-800">Recently Added Food</h2>
-              <button
-                onClick={() => setCurrentTab('log-food')}
-                className="text-xs font-semibold text-teal-600 hover:text-teal-700 bg-teal-50 px-3 py-1.5 rounded-lg"
-              >
-                + Add Food
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Today's Log</p>
+                <p className="text-lg font-extrabold text-gray-800">Recent Foods</p>
+              </div>
+              <button onClick={() => setCurrentTab('log-food')}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold active:scale-95 transition"
+                style={{ background: '#F0FDF9', color: '#0D9488', border: '1.5px solid #99F6E4' }}>
+                <Plus size={13} /> Add Food
               </button>
             </div>
 
             {foodItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="text-4xl mb-3">🍽️</div>
-                <p className="text-sm font-semibold text-gray-500">No food logged yet</p>
-                <p className="text-xs text-gray-400 mt-1">Tap &quot;+ Add Food&quot; to start tracking</p>
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-3" style={{ background: '#F0FDF9' }}>🍽️</div>
+                <p className="text-sm font-bold text-gray-500">Nothing logged yet</p>
+                <p className="text-xs text-gray-400 mt-1">Start by adding your first meal</p>
+                <button onClick={() => setCurrentTab('log-food')}
+                  className="mt-4 px-5 py-2.5 rounded-xl text-sm font-bold text-white"
+                  style={{ background: 'linear-gradient(135deg,#0D9488,#0F766E)' }}>
+                  Log First Meal
+                </button>
               </div>
             ) : (
               <div className="space-y-2">
-                {[...foodItems].reverse().slice(0, 4).map(food => (
-                  <div
-                    key={food.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border-l-4 border-teal-400"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-teal-100 flex items-center justify-center text-lg">
-                        🥗
+                {[...foodItems].reverse().slice(0, 4).map((food, idx) => {
+                  const icons = ['🍛','🥗','🍱','🥘','🍲','🥙','🫓','🥚'];
+                  return (
+                    <div key={food.id}
+                      className="flex items-center gap-3 p-3 rounded-2xl transition"
+                      style={{ background: '#F8FAFB', border: '1px solid #F1F5F9' }}>
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
+                        style={{ background: '#F0FDF9' }}>
+                        {icons[idx % icons.length]}
                       </div>
-                      <div>
-                        <p className="text-sm font-semibold text-gray-800 leading-tight">{food.name}</p>
-                        <p className="text-xs text-gray-400">×{food.quantity} serving</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-gray-800 truncate">{food.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-gray-400">× {food.quantity}</span>
+                          <span className="w-1 h-1 rounded-full bg-gray-300" />
+                          <span className="text-xs text-gray-400">P: {Math.round(food.protein)}g</span>
+                          <span className="w-1 h-1 rounded-full bg-gray-300" />
+                          <span className="text-xs text-gray-400">C: {Math.round(food.carbs)}g</span>
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className="text-sm font-extrabold" style={{ color: '#0D9488' }}>{Math.round(food.calories)}</p>
+                        <p className="text-xs text-gray-400">kcal</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-teal-600">{Math.round(food.calories)}</p>
-                      <p className="text-xs text-gray-400">kcal</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {foodItems.length > 4 && (
-                  <button
-                    onClick={() => setCurrentTab('log-food')}
-                    className="w-full text-center text-xs font-semibold text-teal-600 hover:text-teal-700 py-2"
-                  >
+                  <button onClick={() => setCurrentTab('log-food')}
+                    className="w-full py-3 text-center text-sm font-bold rounded-2xl mt-1 transition active:scale-95"
+                    style={{ background: '#F0FDF9', color: '#0D9488', border: '1px solid #99F6E4' }}>
                     View all {foodItems.length} items →
                   </button>
                 )}
@@ -920,34 +1065,20 @@ const CaloryTrackerPro = () => {
             )}
           </div>
 
-          {/* Water intake */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">Water Intake</h2>
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <div className="relative w-full h-6 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-teal-400 to-teal-600 transition-all"
-                    style={{ width: `${waterPercentage}%` }}
-                  />
-                </div>
-                <p className="text-sm text-gray-600 mt-2">
-                  {dailyData.waterIntake}ml / {dailyData.waterTarget}ml
-                </p>
+          {/* ── DAILY TIP ── */}
+          <div className="rounded-3xl p-5 mb-4 relative overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, #0D9488 0%, #0F766E 60%, #134E4A 100%)', boxShadow: '0 4px 20px rgba(13,148,136,0.25)' }}>
+            <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }} />
+            <div className="absolute bottom-0 -left-4 w-20 h-20 rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }} />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-6 h-6 rounded-lg flex items-center justify-center text-sm" style={{ background: 'rgba(255,255,255,0.15)' }}>💡</div>
+                <p className="text-xs font-bold text-teal-200 uppercase tracking-widest">Daily Tip</p>
               </div>
-              <button
-                onClick={() =>
-                  setDailyData(prev => ({
-                    ...prev,
-                    waterIntake: Math.min(prev.waterIntake + 250, prev.waterTarget),
-                  }))
-                }
-                className="px-4 py-2 bg-teal-500 text-white rounded-lg font-semibold hover:bg-teal-600 transition"
-              >
-                + 250ml
-              </button>
+              <p className="text-white font-semibold text-sm leading-relaxed">{tips[new Date().getDay() % 5]}</p>
             </div>
           </div>
+
         </div>
       </div>
     );
@@ -1119,113 +1250,206 @@ const CaloryTrackerPro = () => {
 
   // ── Progress ──────────────────────────────────────────────────────────────
   const renderProgress = () => {
-    const bmi        = calculateBMI();
+    const bmi         = calculateBMI();
     const bmiCategory = getBMICategory();
+    const caloriesPct = Math.min(Math.round((dailyData.consumedCalories / dailyData.targetCalories) * 100), 100);
+    const waterPct    = Math.min(Math.round((dailyData.waterIntake / dailyData.waterTarget) * 100), 100);
+    const proteinPct  = Math.min(Math.round((dailyData.protein / 150) * 100), 100);
+    const CIRCUMFERENCE = 2 * Math.PI * 40;
+
+    const bmiRanges = [
+      { label: 'Underweight', range: '< 18.5',   color: '#3B82F6', min: 0,    max: 18.5 },
+      { label: 'Healthy',     range: '18.5–24.9', color: '#10B981', min: 18.5, max: 25   },
+      { label: 'Overweight',  range: '25–29.9',   color: '#F59E0B', min: 25,   max: 30   },
+      { label: 'Obese',       range: '≥ 30',      color: '#EF4444', min: 30,   max: 50   },
+    ];
+
+    const stats = [
+      { label: 'Calories',  val: `${Math.round(dailyData.consumedCalories)}`, unit: 'kcal', pct: caloriesPct, color: '#0D9488', bg: '#F0FDF9', icon: '🔥' },
+      { label: 'Water',     val: `${dailyData.waterIntake}`,                  unit: 'ml',   pct: waterPct,    color: '#3B82F6', bg: '#EFF6FF', icon: '💧' },
+      { label: 'Protein',   val: `${Math.round(dailyData.protein)}`,          unit: 'g',    pct: proteinPct,  color: '#8B5CF6', bg: '#F5F3FF', icon: '💪' },
+      { label: 'Burned',    val: `${Math.round(dailyData.burnedCalories||0)}`,unit: 'kcal', pct: Math.min(Math.round(((dailyData.burnedCalories||0)/500)*100),100), color: '#F97316', bg: '#FFF7ED', icon: '⚡' },
+    ];
 
     return (
-      <div className="min-h-screen bg-gray-50 pb-24">
-        <div style={{ background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)' }} className="text-white p-6 pt-8">
-          <h1 className="text-2xl font-bold">Your Progress 📊</h1>
-          <p className="text-teal-50">Track your journey to health</p>
+      <div className="min-h-screen pb-28" style={{ backgroundColor: '#F0F4F8' }}>
+
+        {/* Header */}
+        <div className="relative px-5 pt-10 pb-20 overflow-hidden"
+          style={{ background: 'linear-gradient(145deg, #7C3AED 0%, #6D28D9 50%, #4C1D95 100%)' }}>
+          <div className="absolute -top-8 -right-8 w-44 h-44 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }} />
+          <div className="absolute top-14 -right-4 w-24 h-24 rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }} />
+          <p className="text-purple-200 text-xs font-bold uppercase tracking-widest mb-1">Your Journey</p>
+          <h1 className="text-3xl font-black text-white">Progress</h1>
+          <p className="text-purple-200 text-sm mt-1">
+            {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </p>
         </div>
 
-        <div className="px-6 py-6">
-          {/* Today at a glance */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            {[
-              { label: 'Calories', val: dailyData.consumedCalories, target: dailyData.targetCalories },
-              { label: 'Water',    val: dailyData.waterIntake,      target: dailyData.waterTarget    },
-            ].map(({ label, val, target }) => {
-              const pct = Math.round((val / target) * 100);
-              const col = pct >= 90 ? '#10B981' : pct >= 60 ? '#FBBF24' : '#EF4444';
-              return (
-                <div key={label} className="bg-white rounded-2xl p-4 shadow-sm">
-                  <p className="text-xs text-gray-600 mb-2">{label}</p>
-                  <div className="flex items-center justify-between">
-                    <p className="text-2xl font-bold">{pct}%</p>
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
-                      style={{ background: col }}
-                    >
-                      ✓
+        <div className="px-4 relative" style={{ marginTop: '-60px' }}>
+
+          {/* ── Today's Stats Grid ── */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            {stats.map(s => (
+              <div key={s.label} className="bg-white rounded-3xl p-4"
+                style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{s.label}</p>
+                    <p className="text-xl font-black mt-0.5" style={{ color: s.color }}>
+                      {s.val}<span className="text-xs font-semibold text-gray-400 ml-1">{s.unit}</span>
+                    </p>
+                  </div>
+                  <div className="relative" style={{ width: 44, height: 44 }}>
+                    <svg width="44" height="44" style={{ transform: 'rotate(-90deg)' }}>
+                      <circle cx="22" cy="22" r="18" fill="none" stroke="#F1F5F9" strokeWidth="4" />
+                      <circle cx="22" cy="22" r="18" fill="none"
+                        stroke={s.color} strokeWidth="4"
+                        strokeDasharray={`${(s.pct / 100) * (2 * Math.PI * 18)} ${2 * Math.PI * 18}`}
+                        strokeLinecap="round" />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span style={{ fontSize: 14 }}>{s.icon}</span>
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-
-          {/* BMI */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Body Metrics</h3>
-            <div className="text-center mb-4">
-              <p className="text-4xl font-bold text-gray-800">{bmi ?? '—'}</p>
-              <p className="text-gray-600 mt-2">Your BMI</p>
-            </div>
-            {bmiCategory && (
-              <div
-                className="p-4 rounded-lg text-center font-semibold"
-                style={{
-                  background:  bmiCategory.color + '22',
-                  borderLeft:  `4px solid ${bmiCategory.color}`,
-                  color:       bmiCategory.color,
-                }}
-              >
-                {bmiCategory.category}
+                <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: '#F1F5F9' }}>
+                  <div className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${s.pct}%`, background: s.color }} />
+                </div>
+                <p className="text-xs text-gray-400 mt-1.5 font-medium">{s.pct}% of daily goal</p>
               </div>
-            )}
-            <div className="mt-4 text-sm text-gray-600 space-y-1">
-              <p>Height: {user.height} cm</p>
-              <p>Weight: {user.weight} kg</p>
-            </div>
+            ))}
           </div>
 
-          {/* BMI categories */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">BMI Categories</h3>
-            <div className="space-y-2">
-              {[
-                { label: 'Underweight',    range: 'BMI < 18.5',  bg: 'bg-blue-100',   text: 'text-blue-700'   },
-                { label: 'Healthy Weight', range: '18.5 – 24.9', bg: 'bg-green-100',  text: 'text-green-700'  },
-                { label: 'Overweight',     range: '25 – 29.9',   bg: 'bg-yellow-100', text: 'text-yellow-700' },
-                { label: 'Obese',          range: 'BMI ≥ 30',    bg: 'bg-red-100',    text: 'text-red-700'    },
-              ].map(({ label, range, bg, text }) => (
-                <div key={label} className="flex justify-between items-center p-2">
-                  <span className="text-sm text-gray-600">{label}</span>
-                  <span className={`text-xs ${bg} ${text} px-2 py-1 rounded font-semibold`}>{range}</span>
+          {/* ── BMI Card ── */}
+          <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Body Mass Index</p>
+            <p className="text-lg font-extrabold text-gray-800 mb-4">BMI Analysis</p>
+
+            <div className="flex items-center gap-5 mb-5">
+              {/* BMI ring */}
+              <div className="relative shrink-0" style={{ width: 100, height: 100 }}>
+                <svg width="100" height="100" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="#F1F5F9" strokeWidth="9" />
+                  <circle cx="50" cy="50" r="40" fill="none"
+                    stroke={bmiCategory?.color || '#0D9488'} strokeWidth="9"
+                    strokeDasharray={`${Math.min(((parseFloat(bmi) || 0) / 40), 1) * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
+                    strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <p className="text-xl font-black" style={{ color: bmiCategory?.color || '#0D9488' }}>{bmi ?? '—'}</p>
+                  <p className="text-xs text-gray-400">BMI</p>
+                </div>
+              </div>
+
+              <div className="flex-1">
+                {bmiCategory && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl mb-2"
+                    style={{ background: bmiCategory.color + '18' }}>
+                    <div className="w-2 h-2 rounded-full" style={{ background: bmiCategory.color }} />
+                    <p className="text-sm font-bold" style={{ color: bmiCategory.color }}>{bmiCategory.category}</p>
+                  </div>
+                )}
+                <div className="space-y-1.5 mt-2">
+                  {[
+                    { label: 'Height', val: user.height ? `${user.height} cm` : '—' },
+                    { label: 'Weight', val: user.weight ? `${user.weight} kg` : '—' },
+                  ].map(r => (
+                    <div key={r.label} className="flex justify-between items-center">
+                      <p className="text-xs text-gray-400 font-medium">{r.label}</p>
+                      <p className="text-sm font-bold text-gray-700">{r.val}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* BMI scale bar */}
+            <div className="relative mb-2">
+              <div className="flex rounded-xl overflow-hidden h-3">
+                {bmiRanges.map(r => (
+                  <div key={r.label} className="flex-1" style={{ background: r.color + '55' }} />
+                ))}
+              </div>
+              {bmi && (
+                <div className="absolute top-0 h-3 w-1 rounded-full bg-gray-800"
+                  style={{ left: `${Math.min(((parseFloat(bmi) - 10) / 30) * 100, 98)}%`, transform: 'translateX(-50%)' }} />
+              )}
+            </div>
+            <div className="grid grid-cols-4 gap-1">
+              {bmiRanges.map(r => (
+                <div key={r.label} className="text-center">
+                  <p className="text-xs font-bold" style={{ color: r.color }}>{r.label}</p>
+                  <p className="text-xs text-gray-400">{r.range}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Last 20 days */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-gray-800">Last 20 Days</h3>
-              <button
-                onClick={handleExportData}
-                className="text-teal-600 hover:text-teal-700 font-semibold flex items-center gap-1 text-sm"
-              >
-                <Download size={16} /> Export
+          {/* ── 20-Day Activity Heatmap ── */}
+          <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">History</p>
+                <p className="text-lg font-extrabold text-gray-800">20-Day Activity</p>
+              </div>
+              <button onClick={handleExportData}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition active:scale-95"
+                style={{ background: '#F5F3FF', color: '#7C3AED', border: '1.5px solid #DDD6FE' }}>
+                <Download size={13} /> Export
               </button>
             </div>
-            <div className="grid grid-cols-10 gap-1">
-              {activityHistory.map((day, idx) => (
-                <div key={idx} className="flex flex-col items-center">
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-semibold"
-                    style={{ background: getActivityColor(day.caloriesConsumed) }}
-                    title={`${day.date.toLocaleDateString()}: ${day.caloriesConsumed} cal, ${day.waterIntake}ml`}
-                  >
-                    {day.date.getDate()}
+
+            <div className="grid grid-cols-10 gap-1.5 mb-3">
+              {activityHistory.map((day, idx) => {
+                const pct = Math.min((day.caloriesConsumed / (dailyData.targetCalories || 2000)) * 100, 100);
+                const opacity = pct < 25 ? 0.2 : pct < 50 ? 0.45 : pct < 75 ? 0.7 : 1;
+                return (
+                  <div key={idx} className="flex flex-col items-center gap-1">
+                    <div className="w-full aspect-square rounded-lg flex items-center justify-center"
+                      style={{ background: `rgba(13,148,136,${opacity})` }}
+                      title={`${day.date.toLocaleDateString()}: ${day.caloriesConsumed} kcal`}>
+                      <p className="text-white font-bold" style={{ fontSize: 9 }}>{day.date.getDate()}</p>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {day.date.toLocaleDateString('en-US', { month: 'short' })}
-                  </p>
-                </div>
+                );
+              })}
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center gap-2 justify-end">
+              <p className="text-xs text-gray-400">Less</p>
+              {[0.2, 0.45, 0.7, 1].map(o => (
+                <div key={o} className="w-4 h-4 rounded" style={{ background: `rgba(13,148,136,${o})` }} />
               ))}
+              <p className="text-xs text-gray-400">More</p>
             </div>
           </div>
+
+          {/* ── Weekly Macro Summary ── */}
+          <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Today</p>
+            <p className="text-lg font-extrabold text-gray-800 mb-4">Macro Breakdown</p>
+            {[
+              { label: 'Protein', val: Math.round(dailyData.protein), max: 150, color: '#0D9488' },
+              { label: 'Carbs',   val: Math.round(dailyData.carbs),   max: 300, color: '#F97316' },
+              { label: 'Fat',     val: Math.round(dailyData.fat),     max: 80,  color: '#EF4444' },
+              { label: 'Fiber',   val: Math.round(dailyData.fiber),   max: 38,  color: '#6366F1' },
+            ].map(m => (
+              <div key={m.label} className="mb-3 last:mb-0">
+                <div className="flex justify-between mb-1">
+                  <p className="text-xs font-semibold text-gray-600">{m.label}</p>
+                  <p className="text-xs font-bold" style={{ color: m.color }}>{m.val}g <span className="text-gray-300">/ {m.max}g</span></p>
+                </div>
+                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: '#F1F5F9' }}>
+                  <div className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${Math.min((m.val / m.max) * 100, 100)}%`, background: m.color }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
         </div>
       </div>
     );
@@ -1233,101 +1457,186 @@ const CaloryTrackerPro = () => {
 
   // ── Exercise ──────────────────────────────────────────────────────────────
   const renderExercise = () => {
-    const activeEx = exerciseDatabase.find(e => e.id === selectedExercise);
+    const activeEx      = exerciseDatabase.find(e => e.id === selectedExercise);
+    const burnedSoFar   = Math.round((activeEx?.caloriesPerMin ?? 0) * exerciseTimer / 60);
+    const totalBurned   = exercises.reduce((sum, e) => sum + e.calories, 0);
+    const totalDuration = exercises.reduce((sum, e) => sum + e.duration, 0);
+
+    const categoryColors = {
+      Cardio:    { color: '#EF4444', bg: '#FEF2F2', border: '#FECACA' },
+      Strength:  { color: '#F97316', bg: '#FFF7ED', border: '#FED7AA' },
+      Flexibility:{ color: '#8B5CF6', bg: '#F5F3FF', border: '#DDD6FE' },
+      Sports:    { color: '#3B82F6', bg: '#EFF6FF', border: '#BFDBFE' },
+      Yoga:      { color: '#10B981', bg: '#F0FDF4', border: '#A7F3D0' },
+    };
 
     return (
-      <div className="min-h-screen bg-gray-50 pb-24">
-        <div style={{ background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)' }} className="text-white p-6 pt-8">
-          <h1 className="text-2xl font-bold">Exercise 💪</h1>
-          <p className="text-teal-50">Burn calories and get fit</p>
+      <div className="min-h-screen pb-28" style={{ backgroundColor: '#F0F4F8' }}>
+
+        {/* Header */}
+        <div className="relative px-5 pt-10 pb-20 overflow-hidden"
+          style={{ background: 'linear-gradient(145deg, #DC2626 0%, #B91C1C 50%, #7F1D1D 100%)' }}>
+          <div className="absolute -top-8 -right-8 w-44 h-44 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }} />
+          <div className="absolute top-14 -right-4 w-24 h-24 rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }} />
+          <p className="text-red-200 text-xs font-bold uppercase tracking-widest mb-1">Stay Active</p>
+          <h1 className="text-3xl font-black text-white">Exercise</h1>
+          <p className="text-red-200 text-sm mt-1">Track your workouts &amp; calories burned</p>
         </div>
 
-        <div className="px-6 py-6">
-          {!selectedExercise ? (
-            <>
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Select an Activity</h3>
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                {exerciseDatabase.map(exercise => (
-                  <button
-                    key={exercise.id}
-                    onClick={() => { setSelectedExercise(exercise.id); setExerciseTimer(0); setIsExerciseRunning(false); }}
-                    className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition border-t-4 border-teal-500 text-center"
-                  >
-                    <p className="text-3xl mb-2">{exercise.icon}</p>
-                    <p className="font-semibold text-gray-800 text-sm">{exercise.name}</p>
-                    <p className="text-xs text-gray-600 mt-1">{exercise.caloriesPerMin} cal/min</p>
-                  </button>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="bg-white rounded-2xl p-8 shadow-sm mb-6 text-center">
-              <p className="text-4xl mb-4">{activeEx?.icon}</p>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">{activeEx?.name}</h2>
+        <div className="px-4 relative" style={{ marginTop: '-60px' }}>
 
-              <div className="text-6xl font-bold text-teal-600 mb-6 font-mono">
-                {formatTime(exerciseTimer)}
+          {/* ── Today's Summary Strip ── */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            {[
+              { icon: '⚡', label: 'Burned',    val: Math.round(totalBurned),             unit: 'kcal', color: '#EF4444', bg: '#FEF2F2' },
+              { icon: '⏱️', label: 'Duration',  val: Math.floor(totalDuration / 60),      unit: 'min',  color: '#F97316', bg: '#FFF7ED' },
+              { icon: '🏅', label: 'Workouts',  val: exercises.length,                    unit: 'done', color: '#8B5CF6', bg: '#F5F3FF' },
+            ].map(s => (
+              <div key={s.label} className="bg-white rounded-2xl p-3.5 text-center"
+                style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.07)' }}>
+                <div className="text-xl mb-1">{s.icon}</div>
+                <p className="text-lg font-black" style={{ color: s.color }}>{s.val}<span className="text-xs font-semibold text-gray-400 ml-0.5">{s.unit}</span></p>
+                <p className="text-xs text-gray-400 font-medium">{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Active Timer Card ── */}
+          {selectedExercise ? (
+            <div className="bg-white rounded-3xl p-6 mb-4 text-center"
+              style={{ boxShadow: '0 8px 32px rgba(220,38,38,0.12)' }}>
+
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-3"
+                style={{ background: '#FEF2F2' }}>
+                {activeEx?.icon}
+              </div>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{activeEx?.category || 'Exercise'}</p>
+              <h2 className="text-xl font-extrabold text-gray-800 mb-4">{activeEx?.name}</h2>
+
+              {/* Big timer */}
+              <div className="relative mx-auto mb-5" style={{ width: 160, height: 160 }}>
+                <svg width="160" height="160" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="80" cy="80" r="68" fill="none" stroke="#FEF2F2" strokeWidth="10" />
+                  <circle cx="80" cy="80" r="68" fill="none"
+                    stroke="url(#exGrad)" strokeWidth="10"
+                    strokeDasharray={`${Math.min((exerciseTimer / 3600), 1) * (2 * Math.PI * 68)} ${2 * Math.PI * 68}`}
+                    strokeLinecap="round" />
+                  <defs>
+                    <linearGradient id="exGrad" x1="0%" y1="0%" x2="100%">
+                      <stop offset="0%" stopColor="#FCA5A5" />
+                      <stop offset="100%" stopColor="#DC2626" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <p className="text-3xl font-black text-gray-800 font-mono tracking-wider">{formatTime(exerciseTimer)}</p>
+                  <p className="text-xs text-gray-400 font-medium mt-1">elapsed</p>
+                </div>
               </div>
 
-              <div className="bg-teal-50 p-4 rounded-lg mb-6 border-l-4 border-teal-500">
-                <p className="text-gray-600 text-sm mb-1">Estimated Calories Burned</p>
-                <p className="text-2xl font-bold text-teal-600">
-                  {Math.round((activeEx?.caloriesPerMin ?? 0) * exerciseTimer / 60)}
-                </p>
+              {/* Calories burned live */}
+              <div className="flex justify-center gap-6 mb-6">
+                <div className="text-center">
+                  <p className="text-2xl font-black" style={{ color: '#DC2626' }}>{burnedSoFar}</p>
+                  <p className="text-xs text-gray-400">kcal burned</p>
+                </div>
+                <div className="w-px" style={{ background: '#F1F5F9' }} />
+                <div className="text-center">
+                  <p className="text-2xl font-black text-gray-700">{activeEx?.caloriesPerMin}</p>
+                  <p className="text-xs text-gray-400">kcal / min</p>
+                </div>
               </div>
 
-              <div className="flex gap-4">
+              {/* Controls */}
+              <div className="flex gap-3 mb-3">
                 {!isExerciseRunning ? (
-                  <button
-                    onClick={() => setIsExerciseRunning(true)}
-                    className="flex-1 py-4 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-bold hover:shadow-lg transition flex items-center justify-center gap-2"
-                  >
-                    <Play size={24} /> Start
+                  <button onClick={() => setIsExerciseRunning(true)}
+                    className="flex-1 py-4 rounded-2xl font-bold text-white flex items-center justify-center gap-2 transition active:scale-95"
+                    style={{ background: 'linear-gradient(135deg,#EF4444,#DC2626)', boxShadow: '0 4px 16px rgba(220,38,38,0.3)' }}>
+                    <Play size={20} /> {exerciseTimer === 0 ? 'Start' : 'Resume'}
                   </button>
                 ) : (
-                  <button
-                    onClick={() => setIsExerciseRunning(false)}
-                    className="flex-1 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-bold hover:shadow-lg transition flex items-center justify-center gap-2"
-                  >
-                    <Pause size={24} /> Pause
+                  <button onClick={() => setIsExerciseRunning(false)}
+                    className="flex-1 py-4 rounded-2xl font-bold text-white flex items-center justify-center gap-2 transition active:scale-95"
+                    style={{ background: 'linear-gradient(135deg,#F97316,#EA580C)', boxShadow: '0 4px 16px rgba(249,115,22,0.3)' }}>
+                    <Pause size={20} /> Pause
                   </button>
                 )}
-                <button
-                  onClick={handleEndExercise}
-                  className="flex-1 py-4 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition flex items-center justify-center gap-2"
-                >
-                  <StopCircle size={24} /> End
+                <button onClick={handleEndExercise}
+                  className="flex-1 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition active:scale-95"
+                  style={{ background: '#F1F5F9', color: '#6B7280', border: '2px solid #E5E7EB' }}>
+                  <StopCircle size={20} /> Finish
                 </button>
               </div>
 
-              <button
-                onClick={() => { setSelectedExercise(null); setIsExerciseRunning(false); setExerciseTimer(0); }}
-                className="w-full mt-4 py-2 text-teal-600 font-semibold hover:text-teal-700"
-              >
-                Change Exercise
+              <button onClick={() => { setSelectedExercise(null); setIsExerciseRunning(false); setExerciseTimer(0); }}
+                className="w-full py-2.5 rounded-xl text-sm font-semibold transition active:scale-95"
+                style={{ color: '#DC2626', background: '#FEF2F2' }}>
+                ← Change Exercise
               </button>
+            </div>
+          ) : (
+
+            /* ── Exercise Picker ── */
+            <div className="bg-white rounded-3xl p-5 mb-4"
+              style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Choose Activity</p>
+              <p className="text-lg font-extrabold text-gray-800 mb-4">Select Workout</p>
+
+              <div className="grid grid-cols-2 gap-3">
+                {exerciseDatabase.map(ex => {
+                  const style = categoryColors[ex.category] || { color: '#0D9488', bg: '#F0FDF9', border: '#99F6E4' };
+                  return (
+                    <button key={ex.id}
+                      onClick={() => { setSelectedExercise(ex.id); setExerciseTimer(0); setIsExerciseRunning(false); }}
+                      className="relative p-4 rounded-2xl text-left transition active:scale-95"
+                      style={{ background: style.bg, border: `1.5px solid ${style.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                      <div className="text-3xl mb-2">{ex.icon}</div>
+                      <p className="font-bold text-gray-800 text-sm leading-tight">{ex.name}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                          style={{ background: style.color + '20', color: style.color }}>
+                          {ex.category}
+                        </span>
+                        <span className="text-xs font-bold" style={{ color: style.color }}>
+                          {ex.caloriesPerMin} kcal/min
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
 
+          {/* ── Today's Workout Log ── */}
           {exercises.length > 0 && (
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Today's Workouts</h3>
-              <div className="space-y-3">
+            <div className="bg-white rounded-3xl p-5 mb-4"
+              style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Today</p>
+              <p className="text-lg font-extrabold text-gray-800 mb-4">Workout Log</p>
+              <div className="space-y-2">
                 {exercises.map((ex, idx) => (
-                  <div
-                    key={idx}
-                    className="flex justify-between items-center p-4 bg-teal-50 rounded-lg border-l-4 border-teal-500"
-                  >
-                    <div>
-                      <p className="font-semibold text-gray-800">{ex.name}</p>
-                      <p className="text-sm text-gray-600">{formatTime(ex.duration)}</p>
+                  <div key={idx} className="flex items-center gap-3 p-3 rounded-2xl"
+                    style={{ background: '#FEF2F2', border: '1px solid #FECACA' }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
+                      style={{ background: '#FEE2E2' }}>
+                      {exerciseDatabase.find(e => e.name === ex.name)?.icon || '💪'}
                     </div>
-                    <p className="font-bold text-teal-600">{Math.round(ex.calories)} cal</p>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-gray-800">{ex.name}</p>
+                      <p className="text-xs text-gray-400">{formatTime(ex.duration)} · {Math.round(ex.calories)} kcal</p>
+                    </div>
+                    <div className="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center"
+                      style={{ background: '#DC2626' }}>
+                      <p className="text-white text-xs font-black">✓</p>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
+
         </div>
       </div>
     );
