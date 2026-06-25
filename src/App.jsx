@@ -708,7 +708,7 @@ const CaloryTrackerPro = () => {
               {otpSent ? 'Enter code' : 'Phone number'}
             </h1>
             <p style={{ fontSize:14, color:'rgba(255,255,255,0.4)', margin:0 }}>
-              {otpSent ? `We sent a 6-digit code to ${phone}` : 'We'll send a verification code'}
+              {otpSent ? `We sent a 6-digit code to ${phone}` : "We'll send a verification code"}
             </p>
           </div>
 
