@@ -1254,7 +1254,7 @@ const CaloryTrackerPro = () => {
 
         </div>
       </div>
-    </div>
+      </div>
     );
   };
 
