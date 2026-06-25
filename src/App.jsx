@@ -437,26 +437,29 @@ const CaloryTrackerPro = () => {
   // -- AUTH -----------------------------------------------------------------
 
   const AuthShell = ({ children }) => (
-    <div style={{ minHeight:'100vh', background:'#09090B', display:'flex', flexDirection:'column', position:'relative', overflow:'hidden' }}>
-      {/* Single clean gradient blob top-left */}
-      <div style={{
-        position:'absolute', top:'-120px', left:'-80px',
-        width:'420px', height:'420px', borderRadius:'50%',
-        background:'radial-gradient(circle, rgba(20,184,166,0.18) 0%, transparent 65%)',
-        filter:'blur(48px)', pointerEvents:'none',
-      }}/>
-      {/* Single accent blob bottom-right */}
-      <div style={{
-        position:'absolute', bottom:'-80px', right:'-60px',
-        width:'320px', height:'320px', borderRadius:'50%',
-        background:'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 65%)',
-        filter:'blur(40px)', pointerEvents:'none',
-      }}/>
-      {/* Subtle grid */}
+    <div style={{ minHeight:'100vh', background:'#0B0D0C', display:'flex', flexDirection:'column', position:'relative', overflow:'hidden', fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
+      {/* Faint instrument tick ring, top-right — echoes the home-screen calorie dial */}
+      <svg width="340" height="340" viewBox="0 0 340 340" style={{ position:'absolute', top:-110, right:-90, pointerEvents:'none', opacity:0.5 }}>
+        <circle cx="170" cy="170" r="150" fill="none" stroke="rgba(45,212,191,0.10)" strokeWidth="1" />
+        <circle cx="170" cy="170" r="118" fill="none" stroke="rgba(45,212,191,0.07)" strokeWidth="1" />
+        {Array.from({ length: 48 }).map((_, i) => {
+          const a = (i / 48) * Math.PI * 2;
+          const major = i % 4 === 0;
+          const r1 = major ? 150 : 150;
+          const r2 = major ? 138 : 144;
+          return (
+            <line key={i}
+              x1={170 + r1 * Math.cos(a)} y1={170 + r1 * Math.sin(a)}
+              x2={170 + r2 * Math.cos(a)} y2={170 + r2 * Math.sin(a)}
+              stroke={major ? 'rgba(45,212,191,0.22)' : 'rgba(45,212,191,0.08)'} strokeWidth={major ? 1.4 : 1} />
+          );
+        })}
+      </svg>
+      {/* Hairline baseline grid, very low contrast */}
       <div style={{
         position:'absolute', inset:0, pointerEvents:'none',
-        backgroundImage:'linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px)',
-        backgroundSize:'32px 32px',
+        backgroundImage:'linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px)',
+        backgroundSize:'100% 64px',
       }}/>
       <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', flex:1 }}>
         {children}
@@ -526,41 +529,50 @@ const CaloryTrackerPro = () => {
         <div style={{ flex:1, display:'flex', flexDirection:'column', padding:'0 20px 32px' }}>
 
           {/* Hero */}
-          <div style={{ paddingTop:72, paddingBottom:48, textAlign:'center' }}>
-            <div style={{
-              width:64, height:64, borderRadius:18, margin:'0 auto 20px',
-              background:'linear-gradient(135deg,#14B8A6,#0D9488)',
-              display:'flex', alignItems:'center', justifyContent:'center', fontSize:28,
-              boxShadow:'0 8px 32px rgba(13,148,136,0.35)',
-            }}>🎯</div>
+          <div style={{ paddingTop:64, paddingBottom:40, textAlign:'center' }}>
+            <svg width="56" height="56" viewBox="0 0 56 56" style={{ margin:'0 auto 22px', display:'block' }}>
+              <circle cx="28" cy="28" r="25" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2"/>
+              <circle cx="28" cy="28" r="25" fill="none" stroke="#2DD4BF" strokeWidth="2.5"
+                strokeDasharray="118 157" strokeLinecap="round" transform="rotate(-90 28 28)"/>
+              <circle cx="28" cy="28" r="16" fill="#0D9488"/>
+              <path d="M28 21v7l5 3" stroke="#0B0D0C" strokeWidth="2" strokeLinecap="round" fill="none"/>
+            </svg>
             <h1 style={{
-              fontSize:32, fontWeight:900, letterSpacing:'-0.8px', color:'white',
-              margin:'0 0 8px', lineHeight:1.1,
+              fontSize:30, fontWeight:800, letterSpacing:'-0.6px', color:'white',
+              margin:'0 0 6px', lineHeight:1.1, fontFamily:'Georgia, "Times New Roman", serif',
             }}>Kinetic</h1>
-            <p style={{ fontSize:14, color:'rgba(255,255,255,0.4)', fontWeight:500, margin:0 }}>
-              Nutrition &amp; Fitness Tracking
+            <p style={{ fontSize:13, color:'rgba(255,255,255,0.38)', fontWeight:500, margin:'0 0 20px', letterSpacing:'0.01em' }}>
+              Precision nutrition tracking
             </p>
+            {/* Credibility strip */}
+            <div style={{ display:'inline-flex', alignItems:'center', gap:18, padding:'10px 18px', borderRadius:12, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.06)' }}>
+              {[['100+','Indian foods'],['Free','to start'],['No ads','ever']].map(([n,l],idx) => (
+                <React.Fragment key={l}>
+                  {idx > 0 && <div style={{ width:1, height:24, background:'rgba(255,255,255,0.08)' }}/>}
+                  <div style={{ textAlign:'center' }}>
+                    <p style={{ fontSize:13, fontWeight:800, color:'#2DD4BF', margin:0, fontFamily:'ui-monospace,monospace' }}>{n}</p>
+                    <p style={{ fontSize:9.5, fontWeight:600, color:'rgba(255,255,255,0.3)', margin:0, textTransform:'uppercase', letterSpacing:'0.04em' }}>{l}</p>
+                  </div>
+                </React.Fragment>
+              ))}
+            </div>
           </div>
 
           {/* Auth options */}
           <Card style={{ marginBottom:16 }}>
+            <p style={{ fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'rgba(255,255,255,0.3)', margin:'0 0 14px' }}>
+              Sign in to continue
+            </p>
             <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
 
               {/* Email — primary */}
-              <button onClick={() => handleLogin('email')}
-                style={{
-                  width:'100%', padding:'14px 16px', borderRadius:12,
-                  background:'linear-gradient(135deg,#14B8A6,#0D9488)',
-                  border:'none', color:'white', fontSize:14, fontWeight:700,
-                  cursor:'pointer', display:'flex', alignItems:'center', gap:12,
-                  boxShadow:'0 8px 24px rgba(13,148,136,0.25), 0 1px 0 rgba(255,255,255,0.12) inset',
-                }}>
-                <div style={{ width:34, height:34, borderRadius:9, background:'rgba(255,255,255,0.15)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <Mail size={16} color="white"/>
+              <PrimaryBtn onClick={() => handleLogin('email')} style={{ display:'flex', alignItems:'center', gap:12, textAlign:'left' }}>
+                <div style={{ width:32, height:32, borderRadius:8, background:'rgba(255,255,255,0.15)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                  <Mail size={15} color="white"/>
                 </div>
-                <span style={{ flex:1, textAlign:'left' }}>Continue with Email</span>
+                <span style={{ flex:1 }}>Continue with Email</span>
                 <ChevronRight size={16} color="rgba(255,255,255,0.5)"/>
-              </button>
+              </PrimaryBtn>
 
               {/* Divider */}
               <div style={{ display:'flex', alignItems:'center', gap:12, margin:'2px 0' }}>
@@ -571,8 +583,8 @@ const CaloryTrackerPro = () => {
 
               {/* Google */}
               <GhostBtn onClick={() => handleLogin('google')}>
-                <div style={{ width:34, height:34, borderRadius:9, background:'white', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <div style={{ width:32, height:32, borderRadius:8, background:'white', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -584,22 +596,22 @@ const CaloryTrackerPro = () => {
 
               {/* Phone */}
               <GhostBtn onClick={() => handleLogin('phone')}>
-                <div style={{ width:34, height:34, borderRadius:9, background:'rgba(99,102,241,0.15)', border:'1px solid rgba(99,102,241,0.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <Phone size={15} color="#818CF8"/>
+                <div style={{ width:32, height:32, borderRadius:8, background:'rgba(45,212,191,0.1)', border:'1px solid rgba(45,212,191,0.2)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                  <Phone size={14} color="#2DD4BF"/>
                 </div>
                 Continue with Phone
               </GhostBtn>
-
-              {/* Guest */}
-              <button onClick={() => handleLogin('guest')}
-                style={{ width:'100%', padding:'11px', borderRadius:12, background:'none', border:'1px dashed rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.3)', fontSize:13, fontWeight:600, cursor:'pointer', marginTop:2 }}>
-                Skip — Browse as Guest
-              </button>
             </div>
           </Card>
 
+          {/* Guest */}
+          <button onClick={() => handleLogin('guest')}
+            style={{ width:'100%', padding:'12px', borderRadius:12, background:'none', border:'none', color:'rgba(255,255,255,0.32)', fontSize:13, fontWeight:600, cursor:'pointer', marginBottom:8 }}>
+            Continue as guest →
+          </button>
+
           {/* Sign up */}
-          <p style={{ textAlign:'center', fontSize:13, color:'rgba(255,255,255,0.35)', marginBottom:12 }}>
+          <p style={{ textAlign:'center', fontSize:13, color:'rgba(255,255,255,0.35)', marginBottom:14 }}>
             Don&apos;t have an account?{' '}
             <button
               onClick={() => { setIsNewUser(true); setAuthMethod('email'); setAuthStep('signup'); }}
@@ -701,8 +713,8 @@ const CaloryTrackerPro = () => {
           </button>
 
           <div style={{ padding:'32px 0 28px' }}>
-            <div style={{ width:48, height:48, borderRadius:14, background:'rgba(99,102,241,0.15)', border:'1px solid rgba(99,102,241,0.2)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:16 }}>
-              <Phone size={20} color="#818CF8"/>
+            <div style={{ width:48, height:48, borderRadius:14, background:'rgba(45,212,191,0.12)', border:'1px solid rgba(45,212,191,0.2)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:16 }}>
+              <Phone size={20} color="#2DD4BF"/>
             </div>
             <h1 style={{ fontSize:28, fontWeight:900, color:'white', margin:'0 0 6px', letterSpacing:'-0.5px' }}>
               {otpSent ? 'Enter code' : 'Phone number'}
@@ -728,7 +740,7 @@ const CaloryTrackerPro = () => {
                   </button>
                 ) : (
                   <button onClick={() => { setOtpSent(false); setOtp(''); }}
-                    style={{ padding:'13px 16px', borderRadius:12, background:'rgba(99,102,241,0.1)', border:'1px solid rgba(99,102,241,0.2)', color:'#818CF8', fontSize:13, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
+                    style={{ padding:'13px 16px', borderRadius:12, background:'rgba(45,212,191,0.08)', border:'1px solid rgba(45,212,191,0.2)', color:'#2DD4BF', fontSize:13, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
                     Resend
                   </button>
                 )}
@@ -1253,7 +1265,6 @@ const CaloryTrackerPro = () => {
           </div>
 
         </div>
-      </div>
       </div>
     );
   };
@@ -1894,84 +1905,120 @@ const CaloryTrackerPro = () => {
   const renderProfile = () => {
     const bmi         = calculateBMI();
     const bmiCategory = getBMICategory();
-    const goalLabel   = user.goal === 'lose' ? 'Lose Weight' : user.goal === 'gain' ? 'Gain Weight' : user.goal === 'maintain' ? 'Maintain Weight' : '—';
+    const goalLabel   = user.goal === 'lose' ? 'Lose Weight' : user.goal === 'gain' ? 'Gain Weight' : user.goal === 'maintain' ? 'Maintain Weight' : 'Not set';
     const goalEmoji   = user.goal === 'lose' ? '📉' : user.goal === 'gain' ? '📈' : user.goal === 'maintain' ? '⚖️' : '🎯';
-    const initials    = (user.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+    const initials    = (user.name || 'Guest').trim().split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().slice(0,2) || 'G';
+    const memberSince  = user.id ? new Date().toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) : null;
+    const streakDays   = activityHistory.filter(d => d.caloriesConsumed > 0).length;
 
     return (
       <div className="min-h-screen pb-28" style={{ backgroundColor: '#F0F4F8' }}>
 
-        {/* Header with avatar */}
+        {/* -- HEADER -- (matches Home's teal system, not a clashing palette) */}
         <div className="relative px-5 pt-10 pb-24 overflow-hidden"
-          style={{ background: 'linear-gradient(145deg,#0F172A 0%,#1E293B 50%,#0F172A 100%)' }}>
-          <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full" style={{ background: 'rgba(99,102,241,0.12)' }} />
-          <div className="absolute top-16 -right-4 w-28 h-28 rounded-full" style={{ background: 'rgba(99,102,241,0.07)' }} />
-          <div className="absolute -bottom-6 -left-6 w-36 h-36 rounded-full" style={{ background: 'rgba(99,102,241,0.06)' }} />
+          style={{ background: 'linear-gradient(145deg, #0D9488 0%, #0F766E 50%, #134E4A 100%)' }}>
+          <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }} />
+          <div className="absolute top-16 -right-4 w-28 h-28 rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }} />
+          <div className="absolute -bottom-6 -left-6 w-36 h-36 rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }} />
 
-          <div className="relative z-10 flex items-start gap-4">
-            {/* Avatar */}
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black text-white shrink-0"
-              style={{ background: 'linear-gradient(135deg,#6366F1,#4F46E5)', boxShadow: '0 4px 20px rgba(99,102,241,0.4)' }}>
-              {initials}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-0.5">Your Profile</p>
-              <h1 className="text-2xl font-black text-white truncate">{user.name || 'Guest User'}</h1>
-              <p className="text-slate-400 text-sm truncate">{user.email || 'No email'}</p>
-              {bmi && bmiCategory && (
-                <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg"
-                  style={{ background: bmiCategory.color + '22', border: `1px solid ${bmiCategory.color}44` }}>
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: bmiCategory.color }} />
-                  <p className="text-xs font-bold" style={{ color: bmiCategory.color }}>BMI {bmi} · {bmiCategory.category}</p>
+          <div className="relative z-10 flex items-start justify-between">
+            <div className="flex items-center gap-4">
+              {/* Avatar with BMI-ring accent — echoes the home-screen dial language */}
+              <div className="relative w-16 h-16 shrink-0">
+                <svg width="64" height="64" viewBox="0 0 64 64" className="absolute inset-0">
+                  <circle cx="32" cy="32" r="30" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="2"/>
+                </svg>
+                <div className="absolute inset-1 rounded-full flex items-center justify-center text-lg font-black text-white"
+                  style={{ background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.25)' }}>
+                  {initials}
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="px-4 relative" style={{ marginTop: '-52px' }}>
-
-          {/* Stats row */}
-          <div className="grid grid-cols-4 gap-2 mb-4">
-            {[
-              { label:'Age',    val: user.age    ? `${user.age}y`    : '—', icon:'🎂', color:'#6366F1' },
-              { label:'Height', val: user.height ? `${user.height}cm`: '—', icon:'📏', color:'#0D9488' },
-              { label:'Weight', val: user.weight ? `${user.weight}kg`: '—', icon:'⚖️', color:'#F97316' },
-              { label:'BMI',    val: bmi || '—',                             icon:'❤️', color: bmiCategory?.color || '#EF4444' },
-            ].map(s => (
-              <div key={s.label} className="bg-white rounded-2xl p-3 text-center"
-                style={{ boxShadow:'0 4px 16px rgba(0,0,0,0.08)' }}>
-                <div className="text-lg mb-1">{s.icon}</div>
-                <p className="text-sm font-black" style={{ color:s.color }}>{s.val}</p>
-                <p className="text-xs text-gray-400 font-medium">{s.label}</p>
               </div>
-            ))}
-          </div>
-
-          {/* Goal card */}
-          <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Fitness</p>
-            <p className="text-lg font-extrabold text-gray-800 mb-3">Your Goal</p>
-            <div className="flex items-center gap-4 p-4 rounded-2xl"
-              style={{ background:'linear-gradient(135deg,#EEF2FF,#E0E7FF)', border:'1.5px solid #C7D2FE' }}>
-              <span className="text-3xl">{goalEmoji}</span>
-              <div>
-                <p className="font-black text-indigo-800 text-base">{goalLabel}</p>
-                <p className="text-xs text-indigo-500 mt-0.5">
-                  {user.goal === 'lose' ? 'Caloric deficit · More cardio'
-                    : user.goal === 'gain' ? 'Caloric surplus · Strength training'
-                    : user.goal === 'maintain' ? 'Balanced diet · Regular activity'
-                    : 'Set a goal to get personalised tips'}
+              <div className="min-w-0">
+                <p className="text-teal-200 text-xs font-bold uppercase tracking-widest mb-0.5">
+                  {user.isGuest ? 'Guest Session' : 'Your Account'}
+                </p>
+                <h1 className="text-2xl font-black text-white truncate leading-tight">{user.name || 'Guest User'}</h1>
+                <p className="text-sm truncate" style={{ color: 'rgba(204,251,241,0.7)' }}>
+                  {user.email || 'Not signed in with an account'}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Edit Profile */}
+          {/* Membership / status chip row */}
+          <div className="relative z-10 flex items-center gap-2 mt-4 flex-wrap">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.18)' }}>
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+              <p className="text-xs font-bold text-white">{user.isGuest ? 'Guest plan' : 'Free plan'}</p>
+            </div>
+            {memberSince && (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                <p className="text-xs font-medium" style={{ color: 'rgba(204,251,241,0.8)' }}>Member since {memberSince}</p>
+              </div>
+            )}
+            {bmi && bmiCategory && (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg"
+                style={{ background: 'rgba(255,255,255,0.1)', border: `1px solid ${bmiCategory.color}66` }}>
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: bmiCategory.color }} />
+                <p className="text-xs font-bold" style={{ color: 'white' }}>BMI {bmi} · {bmiCategory.category}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="px-4 relative" style={{ marginTop: '-52px' }}>
+
+          {/* -- STATS ROW -- */}
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            {[
+              { label:'Age',    val: user.age    ? `${user.age}`     : '—', unit: user.age ? 'yrs' : '', color:'#0D9488' },
+              { label:'Height', val: user.height ? `${user.height}`  : '—', unit: user.height ? 'cm' : '', color:'#0D9488' },
+              { label:'Weight', val: user.weight ? `${user.weight}`  : '—', unit: user.weight ? 'kg' : '', color:'#F97316' },
+              { label:'BMI',    val: bmi || '—',                            unit: '',                      color: bmiCategory?.color || '#9CA3AF' },
+            ].map(s => (
+              <div key={s.label} className="bg-white rounded-2xl p-3 text-center" style={{ boxShadow:'0 4px 16px rgba(0,0,0,0.07)' }}>
+                <p className="text-base font-black leading-none" style={{ color:s.color, fontFamily:'ui-monospace,monospace' }}>
+                  {s.val}<span className="text-[10px] font-bold ml-0.5">{s.unit}</span>
+                </p>
+                <p className="text-[11px] text-gray-400 font-semibold mt-1 uppercase tracking-wide">{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* -- GOAL + STREAK -- */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="bg-white rounded-3xl p-4" style={{ boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Goal</p>
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl">{goalEmoji}</span>
+                <div className="min-w-0">
+                  <p className="font-extrabold text-gray-800 text-sm truncate">{goalLabel}</p>
+                  <p className="text-[11px] text-gray-400 truncate">
+                    {user.goal === 'lose' ? 'Calorie deficit'
+                      : user.goal === 'gain' ? 'Calorie surplus'
+                      : user.goal === 'maintain' ? 'Balanced intake'
+                      : 'Tap edit to set'}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-3xl p-4" style={{ boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Logged days</p>
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl">🔥</span>
+                <div className="min-w-0">
+                  <p className="font-extrabold text-gray-800 text-sm">{streakDays} / 20</p>
+                  <p className="text-[11px] text-gray-400">Last 20-day window</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* -- EDIT PROFILE -- */}
           {!editingProfile ? (
             <button onClick={() => setEditingProfile(true)}
               className="w-full py-4 rounded-2xl font-bold text-white flex items-center justify-center gap-2 mb-4 transition active:scale-95"
-              style={{ background:'linear-gradient(135deg,#6366F1,#4F46E5)', boxShadow:'0 4px 16px rgba(99,102,241,0.3)' }}>
+              style={{ background:'linear-gradient(135deg,#0D9488,#0F766E)', boxShadow:'0 4px 16px rgba(13,148,136,0.3)' }}>
               <Settings size={18} /> Edit Profile
             </button>
           ) : (
@@ -2011,9 +2058,9 @@ const CaloryTrackerPro = () => {
                   <p className="text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Fitness Goal</p>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { val:'lose',     label:'Lose Weight', emoji:'📉', color:'#EF4444', bg:'#FEF2F2', border:'#FECACA' },
-                      { val:'maintain', label:'Maintain',    emoji:'⚖️', color:'#6366F1', bg:'#EEF2FF', border:'#C7D2FE' },
-                      { val:'gain',     label:'Gain Weight', emoji:'📈', color:'#059669', bg:'#ECFDF5', border:'#A7F3D0' },
+                      { val:'lose',     label:'Lose Weight', emoji:'📉', color:'#EF4444', bg:'#FEF2F2' },
+                      { val:'maintain', label:'Maintain',    emoji:'⚖️', color:'#0D9488', bg:'#F0FDF9' },
+                      { val:'gain',     label:'Gain Weight', emoji:'📈', color:'#059669', bg:'#ECFDF5' },
                     ].map(g => (
                       <button key={g.val}
                         onClick={() => setUser(u => ({ ...u, goal: g.val }))}
@@ -2033,7 +2080,7 @@ const CaloryTrackerPro = () => {
               <div className="flex gap-3 mt-5">
                 <button onClick={() => setEditingProfile(false)}
                   className="flex-1 py-3.5 rounded-2xl font-bold text-white transition active:scale-95"
-                  style={{ background:'linear-gradient(135deg,#6366F1,#4F46E5)', boxShadow:'0 4px 12px rgba(99,102,241,0.3)' }}>
+                  style={{ background:'linear-gradient(135deg,#0D9488,#0F766E)', boxShadow:'0 4px 12px rgba(13,148,136,0.3)' }}>
                   Save Changes
                 </button>
                 <button onClick={() => setEditingProfile(false)}
@@ -2045,15 +2092,33 @@ const CaloryTrackerPro = () => {
             </div>
           )}
 
-          {/* Settings */}
+          {/* -- DATA & ACCOUNT -- */}
+          <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Data</p>
+            <p className="text-lg font-extrabold text-gray-800 mb-3">Your Data</p>
+            <button onClick={handleExportData}
+              className="w-full flex items-center gap-3 p-3.5 rounded-2xl transition active:scale-98"
+              style={{ background:'#F8FAFB' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background:'#0D948818' }}>
+                <Download size={18} color="#0D9488" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="text-sm font-bold text-gray-800">Export activity report</p>
+                <p className="text-xs text-gray-400">Last 20 days · CSV file</p>
+              </div>
+              <ChevronRight size={16} color="#D1D5DB" />
+            </button>
+          </div>
+
+          {/* -- SETTINGS -- */}
           <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">App</p>
             <p className="text-lg font-extrabold text-gray-800 mb-3">Settings</p>
             <div className="space-y-1">
               {[
                 { icon:'🔔', label:'Notifications',  sub:'Meal reminders & alerts',    color:'#F97316' },
-                { icon:'🔒', label:'Privacy',         sub:'Data & security settings',   color:'#6366F1' },
-                { icon:'ℹ️', label:'About Kinetic',   sub:'Version 1.0.0',              color:'#0D9488' },
+                { icon:'🔒', label:'Privacy',         sub:'Data & security settings',   color:'#0D9488' },
+                { icon:'ℹ️', label:'About Kinetic',   sub:'Version 1.0.0',              color:'#6366F1' },
               ].map(s => (
                 <button key={s.label}
                   className="w-full flex items-center gap-3 p-3.5 rounded-2xl transition active:scale-98"
@@ -2072,7 +2137,7 @@ const CaloryTrackerPro = () => {
             </div>
           </div>
 
-          {/* Logout */}
+          {/* -- SIGN OUT -- */}
           <button onClick={() => setAuthStep('login')}
             className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 mb-4 transition active:scale-95"
             style={{ background:'#FEF2F2', color:'#EF4444', border:'2px solid #FECACA' }}>
