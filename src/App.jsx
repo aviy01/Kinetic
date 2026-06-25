@@ -22,10 +22,10 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-// ─── Static Data ────────────────────────────────────────────────────────────
+// --- Static Data ------------------------------------------------------------
 
 const foodDatabase = [
-  // ── Indian Staples & Rice Dishes ─────────────────────────────────────────
+  // -- Indian Staples & Rice Dishes -----------------------------------------
   { id: 1,   name: 'Basmati Rice, cooked (100g)',       calories: 130, protein: 2.7, carbs: 28,  fat: 0.3, fiber: 0.4 },
   { id: 2,   name: 'Brown Rice, cooked (100g)',          calories: 111, protein: 2.6, carbs: 23,  fat: 0.9, fiber: 1.8 },
   { id: 3,   name: 'Jeera Rice (1 serving 150g)',        calories: 220, protein: 4,   carbs: 40,  fat: 5,   fiber: 0.5 },
@@ -34,7 +34,7 @@ const foodDatabase = [
   { id: 6,   name: 'Khichdi (1 bowl 200g)',              calories: 200, protein: 7,   carbs: 35,  fat: 4,   fiber: 3   },
   { id: 7,   name: 'Pulao (1 serving 150g)',             calories: 210, protein: 4,   carbs: 38,  fat: 5,   fiber: 1.5 },
 
-  // ── Indian Breads ─────────────────────────────────────────────────────────
+  // -- Indian Breads ---------------------------------------------------------
   { id: 8,   name: 'Roti / Chapati (1 piece)',           calories: 71,  protein: 2.7, carbs: 14,  fat: 0.9, fiber: 1.9 },
   { id: 9,   name: 'Whole Wheat Roti (1 piece)',         calories: 80,  protein: 3,   carbs: 15,  fat: 1,   fiber: 2.5 },
   { id: 10,  name: 'Paratha - Plain (1 piece)',          calories: 160, protein: 3.5, carbs: 22,  fat: 6,   fiber: 2   },
@@ -47,7 +47,7 @@ const foodDatabase = [
   { id: 17,  name: 'Idli (1 piece)',                     calories: 39,  protein: 2,   carbs: 8,   fat: 0.2, fiber: 0.5 },
   { id: 18,  name: 'Uttapam (1 piece)',                  calories: 107, protein: 3.5, carbs: 18,  fat: 2.5, fiber: 1.5 },
 
-  // ── Indian Curries & Gravies ──────────────────────────────────────────────
+  // -- Indian Curries & Gravies ----------------------------------------------
   { id: 19,  name: 'Dal Tadka (1 bowl 200ml)',           calories: 170, protein: 10,  carbs: 22,  fat: 5,   fiber: 6   },
   { id: 20,  name: 'Dal Makhani (1 bowl 200ml)',         calories: 220, protein: 10,  carbs: 24,  fat: 9,   fiber: 6   },
   { id: 21,  name: 'Chana Masala (1 bowl 200g)',         calories: 210, protein: 11,  carbs: 32,  fat: 5,   fiber: 9   },
@@ -62,7 +62,7 @@ const foodDatabase = [
   { id: 30,  name: 'Sambar (1 bowl 200ml)',              calories: 90,  protein: 4,   carbs: 14,  fat: 2,   fiber: 4   },
   { id: 31,  name: 'Rasam (1 bowl 200ml)',               calories: 50,  protein: 2,   carbs: 8,   fat: 1,   fiber: 1   },
 
-  // ── Indian Snacks & Street Food ───────────────────────────────────────────
+  // -- Indian Snacks & Street Food -------------------------------------------
   { id: 32,  name: 'Samosa (1 piece)',                   calories: 130, protein: 2.5, carbs: 16,  fat: 6.5, fiber: 1.5 },
   { id: 33,  name: 'Vada Pav (1 piece)',                 calories: 290, protein: 6,   carbs: 44,  fat: 10,  fiber: 3   },
   { id: 34,  name: 'Pav Bhaji (1 plate)',                calories: 380, protein: 9,   carbs: 55,  fat: 14,  fiber: 6   },
@@ -73,14 +73,14 @@ const foodDatabase = [
   { id: 39,  name: 'Medu Vada (1 piece)',                calories: 100, protein: 3.5, carbs: 12,  fat: 4.5, fiber: 1.5 },
   { id: 40,  name: 'Pakora (4 pieces 80g)',              calories: 200, protein: 5,   carbs: 22,  fat: 10,  fiber: 2   },
 
-  // ── Indian Breakfast ──────────────────────────────────────────────────────
+  // -- Indian Breakfast ------------------------------------------------------
   { id: 41,  name: 'Poha (1 bowl 150g)',                 calories: 180, protein: 4,   carbs: 32,  fat: 4,   fiber: 2   },
   { id: 42,  name: 'Upma (1 bowl 150g)',                 calories: 190, protein: 5,   carbs: 30,  fat: 5,   fiber: 2.5 },
   { id: 43,  name: 'Halwa - Suji (1 bowl 100g)',         calories: 230, protein: 3,   carbs: 36,  fat: 8,   fiber: 0.5 },
   { id: 44,  name: 'Besan Cheela (1 piece)',             calories: 120, protein: 6,   carbs: 14,  fat: 4,   fiber: 3   },
   { id: 45,  name: 'Sabudana Khichdi (1 bowl 150g)',     calories: 300, protein: 3,   carbs: 55,  fat: 7,   fiber: 1   },
 
-  // ── Indian Dairy & Drinks ─────────────────────────────────────────────────
+  // -- Indian Dairy & Drinks -------------------------------------------------
   { id: 46,  name: 'Paneer (100g)',                      calories: 265, protein: 18,  carbs: 1.2, fat: 20,  fiber: 0   },
   { id: 47,  name: 'Dahi / Curd (100g)',                 calories: 60,  protein: 3.5, carbs: 4,   fat: 3,   fiber: 0   },
   { id: 48,  name: 'Lassi - Sweet (1 glass 250ml)',      calories: 200, protein: 6,   carbs: 30,  fat: 6,   fiber: 0   },
@@ -90,20 +90,20 @@ const foodDatabase = [
   { id: 52,  name: 'Buttermilk / Chaas (1 glass 200ml)',calories: 40,  protein: 2,   carbs: 4,   fat: 1,   fiber: 0   },
   { id: 53,  name: 'Milk - Full Fat (200ml)',            calories: 130, protein: 6.8, carbs: 9.6, fat: 7,   fiber: 0   },
 
-  // ── Indian Sweets & Desserts ──────────────────────────────────────────────
+  // -- Indian Sweets & Desserts ----------------------------------------------
   { id: 54,  name: 'Gulab Jamun (1 piece)',              calories: 150, protein: 2,   carbs: 25,  fat: 5,   fiber: 0   },
   { id: 55,  name: 'Jalebi (2 pieces 50g)',              calories: 150, protein: 1.5, carbs: 30,  fat: 3.5, fiber: 0   },
   { id: 56,  name: 'Kheer (1 bowl 150g)',                calories: 180, protein: 5,   carbs: 28,  fat: 5.5, fiber: 0.5 },
   { id: 57,  name: 'Ladoo - Besan (1 piece)',            calories: 180, protein: 4,   carbs: 22,  fat: 9,   fiber: 1   },
 
-  // ── Pulses & Legumes ──────────────────────────────────────────────────────
+  // -- Pulses & Legumes ------------------------------------------------------
   { id: 58,  name: 'Moong Dal, cooked (100g)',           calories: 105, protein: 7,   carbs: 19,  fat: 0.4, fiber: 7   },
   { id: 59,  name: 'Masoor Dal, cooked (100g)',          calories: 116, protein: 9,   carbs: 20,  fat: 0.4, fiber: 8   },
   { id: 60,  name: 'Chana Dal, cooked (100g)',           calories: 164, protein: 9,   carbs: 27,  fat: 2.6, fiber: 8   },
   { id: 61,  name: 'Kidney Beans / Rajma (100g)',        calories: 127, protein: 8.7, carbs: 22,  fat: 0.5, fiber: 6   },
   { id: 62,  name: 'Black Chana, cooked (100g)',         calories: 164, protein: 9,   carbs: 27,  fat: 2.6, fiber: 8   },
 
-  // ── Vegetables (Indian Cooking) ───────────────────────────────────────────
+  // -- Vegetables (Indian Cooking) -------------------------------------------
   { id: 63,  name: 'Aloo Gobi (1 bowl 150g)',            calories: 130, protein: 3,   carbs: 18,  fat: 5,   fiber: 4   },
   { id: 64,  name: 'Bhindi Masala (1 bowl 150g)',        calories: 110, protein: 3,   carbs: 12,  fat: 5,   fiber: 4   },
   { id: 65,  name: 'Baingan Bharta (1 bowl 150g)',       calories: 100, protein: 2.5, carbs: 12,  fat: 4.5, fiber: 4   },
@@ -113,7 +113,7 @@ const foodDatabase = [
   { id: 69,  name: 'Onion (1 medium)',                   calories: 44,  protein: 1.2, carbs: 10,  fat: 0.1, fiber: 1.7 },
   { id: 70,  name: 'Potato (1 medium 150g)',             calories: 116, protein: 2.5, carbs: 26,  fat: 0.1, fiber: 2.2 },
 
-  // ── Fruits (Common in India) ──────────────────────────────────────────────
+  // -- Fruits (Common in India) ----------------------------------------------
   { id: 71,  name: 'Mango (1 medium 200g)',              calories: 134, protein: 1,   carbs: 35,  fat: 0.6, fiber: 3   },
   { id: 72,  name: 'Banana (1 medium)',                  calories: 89,  protein: 1.1, carbs: 23,  fat: 0.3, fiber: 2.6 },
   { id: 73,  name: 'Apple (1 medium)',                   calories: 95,  protein: 0.5, carbs: 25,  fat: 0.3, fiber: 4.4 },
@@ -123,14 +123,14 @@ const foodDatabase = [
   { id: 77,  name: 'Orange (1 medium)',                  calories: 62,  protein: 1.2, carbs: 15,  fat: 0.2, fiber: 3.1 },
   { id: 78,  name: 'Pomegranate (100g)',                 calories: 83,  protein: 1.7, carbs: 19,  fat: 1.2, fiber: 4   },
 
-  // ── Nuts & Seeds ─────────────────────────────────────────────────────────
+  // -- Nuts & Seeds ---------------------------------------------------------
   { id: 79,  name: 'Almonds (30g / ~20 pieces)',         calories: 164, protein: 6,   carbs: 6,   fat: 14,  fiber: 3.5 },
   { id: 80,  name: 'Cashews (30g)',                      calories: 163, protein: 4.3, carbs: 9,   fat: 13,  fiber: 0.9 },
   { id: 81,  name: 'Peanuts (30g)',                      calories: 166, protein: 7.5, carbs: 6,   fat: 14,  fiber: 2.5 },
   { id: 82,  name: 'Walnuts (30g)',                      calories: 196, protein: 4.6, carbs: 4,   fat: 19,  fiber: 2   },
   { id: 83,  name: 'Flaxseeds (1 tbsp 10g)',             calories: 55,  protein: 1.9, carbs: 3,   fat: 4.3, fiber: 2.8 },
 
-  // ── Proteins ──────────────────────────────────────────────────────────────
+  // -- Proteins --------------------------------------------------------------
   { id: 84,  name: 'Chicken Breast (100g)',              calories: 165, protein: 31,  carbs: 0,   fat: 3.6, fiber: 0   },
   { id: 85,  name: 'Chicken Leg (100g)',                 calories: 232, protein: 26,  carbs: 0,   fat: 14,  fiber: 0   },
   { id: 86,  name: 'Egg (1 whole large)',                calories: 78,  protein: 6.3, carbs: 0.6, fat: 5.3, fiber: 0   },
@@ -140,7 +140,7 @@ const foodDatabase = [
   { id: 90,  name: 'Greek Yogurt (100g)',                calories: 59,  protein: 10,  carbs: 3.3, fat: 0.4, fiber: 0   },
   { id: 91,  name: 'Whey Protein (1 scoop 30g)',         calories: 120, protein: 24,  carbs: 3,   fat: 1.5, fiber: 0   },
 
-  // ── Fast Food & Common Outside Food ───────────────────────────────────────
+  // -- Fast Food & Common Outside Food ---------------------------------------
   { id: 92,  name: 'Burger - Veg (1 piece)',             calories: 310, protein: 8,   carbs: 42,  fat: 12,  fiber: 3   },
   { id: 93,  name: 'Burger - Chicken (1 piece)',         calories: 380, protein: 20,  carbs: 38,  fat: 17,  fiber: 2   },
   { id: 94,  name: 'Pizza - Veg slice (1 slice)',        calories: 250, protein: 9,   carbs: 33,  fat: 9,   fiber: 2   },
@@ -165,7 +165,7 @@ const exerciseDatabase = [
   { id: 10, name: 'Skipping',      caloriesPerMin: 10, icon: '⛹️' },
 ];
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// --- Helpers -----------------------------------------------------------------
 
 const formatTime = (seconds) => {
   const mins = Math.floor(seconds / 60);
@@ -180,16 +180,16 @@ const getActivityColor = (caloriesConsumed, target = 2000) => {
   return '#EF4444';
 };
 
-// ─── Tab icon / label maps (defined outside component to avoid re-creation) ──
+// --- Tab icon / label maps (defined outside component to avoid re-creation) --
 
 const TAB_LIST   = ['home', 'log-food', 'progress', 'exercise', 'profile'];
 const TAB_LABELS = { home: 'Home', 'log-food': 'Log Food', progress: 'Progress', exercise: 'Exercise', profile: 'Profile' };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// --- Main Component -----------------------------------------------------------
 
 const CaloryTrackerPro = () => {
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
+  // -- Auth ------------------------------------------------------------------
   const [authStep,   setAuthStep]   = useState('login'); // login | signup | otp | onboarding | app
   const [authMethod, setAuthMethod] = useState(null);    // email | google | phone | guest
   const [email,      setEmail]      = useState('');
@@ -203,17 +203,17 @@ const CaloryTrackerPro = () => {
   const [editingProfile, setEditingProfile] = useState(false); // show edit profile form
   const [onboardingStep, setOnboardingStep] = useState('basics'); // basics | body | goal
 
-  // ── User profile ──────────────────────────────────────────────────────────
+  // -- User profile ----------------------------------------------------------
   const [user, setUser] = useState({
     id: null, name: '', email: '', gender: '',
     age: '', height: '', weight: '', goal: '', isGuest: false,
   });
 
-  // ── App navigation ────────────────────────────────────────────────────────
+  // -- App navigation --------------------------------------------------------
   const [currentTab,      setCurrentTab]      = useState('home');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
-  // ── Daily nutrition data ──────────────────────────────────────────────────
+  // -- Daily nutrition data --------------------------------------------------
   const [dailyData, setDailyData] = useState({
     targetCalories: 2000,
     consumedCalories: 0,
@@ -222,20 +222,20 @@ const CaloryTrackerPro = () => {
     waterTarget: 3000,
   });
 
-  // ── Food log ──────────────────────────────────────────────────────────────
+  // -- Food log --------------------------------------------------------------
   const [foodItems,    setFoodItems]    = useState([]);
   const [foodSearch,   setFoodSearch]   = useState('');
   const [foodCategory, setFoodCategory] = useState('All');
   const [selectedFood, setSelectedFood] = useState(null);
   const [foodQuantity, setFoodQuantity] = useState('');
 
-  // ── Exercise ──────────────────────────────────────────────────────────────
+  // -- Exercise --------------------------------------------------------------
   const [exercises,         setExercises]         = useState([]);
   const [selectedExercise,  setSelectedExercise]  = useState(null);
   const [exerciseTimer,     setExerciseTimer]     = useState(0);
   const [isExerciseRunning, setIsExerciseRunning] = useState(false);
 
-  // ── Activity history (lazy init so random values are stable) ─────────────
+  // -- Activity history (lazy init so random values are stable) -------------
   // FIX: was re-generated on every render; lazy initialiser runs only once.
   const [activityHistory] = useState(() =>
     Array.from({ length: 20 }, (_, i) => ({
@@ -246,7 +246,7 @@ const CaloryTrackerPro = () => {
     }))
   );
 
-  // ── Exercise timer effect ─────────────────────────────────────────────────
+  // -- Exercise timer effect -------------------------------------------------
   useEffect(() => {
     let interval;
     if (isExerciseRunning && selectedExercise) {
@@ -255,7 +255,7 @@ const CaloryTrackerPro = () => {
     return () => clearInterval(interval);
   }, [isExerciseRunning, selectedExercise]);
 
-  // ── BMI helpers ───────────────────────────────────────────────────────────
+  // -- BMI helpers -----------------------------------------------------------
   const calculateBMI = () => {
     if (!user.height || !user.weight) return null;
     const h = user.height / 100;
@@ -272,7 +272,7 @@ const CaloryTrackerPro = () => {
     return              { category: 'Obese',           color: '#EF4444' };
   };
 
-  // ── Auth handlers ─────────────────────────────────────────────────────────
+  // -- Auth handlers ---------------------------------------------------------
   const handleLogin = (method) => {
     setAuthMethod(method);
     if (method === 'guest') {
@@ -331,7 +331,7 @@ const CaloryTrackerPro = () => {
     setAuthStep('app');
   };
 
-  // ── Food handlers ─────────────────────────────────────────────────────────
+  // -- Food handlers ---------------------------------------------------------
   const handleAddFood = () => {
     if (!selectedFood || !foodQuantity) { alert('Select food and enter quantity'); return; }
     const food     = foodDatabase.find(f => f.id === selectedFood);
@@ -380,7 +380,7 @@ const CaloryTrackerPro = () => {
     }));
   };
 
-  // ── Exercise handlers ─────────────────────────────────────────────────────
+  // -- Exercise handlers -----------------------------------------------------
   const handleEndExercise = () => {
     const exercise = exerciseDatabase.find(e => e.id === selectedExercise);
     // FIX: guard for missing exercise entry.
@@ -405,7 +405,7 @@ const CaloryTrackerPro = () => {
     setIsExerciseRunning(false);
   };
 
-  // ── Export ────────────────────────────────────────────────────────────────
+  // -- Export ----------------------------------------------------------------
   const handleExportData = () => {
     const avg   = Math.round(activityHistory.reduce((a, b) => a + b.caloriesConsumed, 0) / activityHistory.length);
     const water = activityHistory.reduce((a, b) => a + b.waterIntake, 0);
@@ -430,11 +430,11 @@ const CaloryTrackerPro = () => {
     window.URL.revokeObjectURL(url);
   };
 
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ===========================================================================
   // AUTH SCREENS
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ===========================================================================
 
-  // ── AUTH ─────────────────────────────────────────────────────────────────
+  // -- AUTH -----------------------------------------------------------------
 
   const AuthShell = ({ children }) => (
     <div style={{ minHeight:'100vh', background:'#09090B', display:'flex', flexDirection:'column', position:'relative', overflow:'hidden' }}>
@@ -519,7 +519,7 @@ const CaloryTrackerPro = () => {
     </div>
   );
 
-  // ── LOGIN ─────────────────────────────────────────────────────────────────
+  // -- LOGIN -----------------------------------------------------------------
   if (authStep === 'login') {
     return (
       <AuthShell>
@@ -616,7 +616,7 @@ const CaloryTrackerPro = () => {
     );
   }
 
-  // ── EMAIL SIGN IN / SIGN UP ───────────────────────────────────────────────
+  // -- EMAIL SIGN IN / SIGN UP -----------------------------------------------
   if (authStep === 'signup' && authMethod === 'email') {
     return (
       <AuthShell>
@@ -690,7 +690,7 @@ const CaloryTrackerPro = () => {
     );
   }
 
-  // ── PHONE OTP ─────────────────────────────────────────────────────────────
+  // -- PHONE OTP -------------------------------------------------------------
   if (authStep === 'otp') {
     return (
       <AuthShell>
@@ -758,7 +758,7 @@ const CaloryTrackerPro = () => {
     );
   }
 
-  // ── ONBOARDING ────────────────────────────────────────────────────────────
+  // -- ONBOARDING ------------------------------------------------------------
   if (authStep === 'onboarding') {
     const steps   = ['basics','body','goal'];
     const stepIdx = steps.indexOf(onboardingStep || 'basics');
@@ -927,9 +927,9 @@ const CaloryTrackerPro = () => {
   }
 
   // MAIN APP  (authStep === 'app')
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ===========================================================================
 
-  // ── Home ──────────────────────────────────────────────────────────────────
+  // -- Home ------------------------------------------------------------------
   const renderHome = () => {
     const caloriePercentage = Math.min((dailyData.consumedCalories / dailyData.targetCalories) * 100, 100);
     const waterPercentage   = Math.min((dailyData.waterIntake / dailyData.waterTarget) * 100, 100);
@@ -952,7 +952,7 @@ const CaloryTrackerPro = () => {
     return (
       <div className="min-h-screen pb-28" style={{ backgroundColor: '#F0F4F8' }}>
 
-        {/* ── HEADER ── */}
+        {/* -- HEADER -- */}
         <div className="relative px-5 pt-10 pb-24 overflow-hidden"
           style={{ background: 'linear-gradient(145deg, #0D9488 0%, #0F766E 50%, #134E4A 100%)' }}>
           {/* decorative blobs */}
@@ -981,7 +981,7 @@ const CaloryTrackerPro = () => {
 
         <div className="px-4 relative z-10" style={{ marginTop: '-72px' }}>
 
-          {/* ── HERO CALORIE CARD ── */}
+          {/* -- HERO CALORIE CARD -- */}
           <div className="rounded-3xl mb-4 overflow-hidden"
             style={{ background: 'white', boxShadow: '0 8px 32px rgba(13,148,136,0.13)' }}>
 
@@ -1097,7 +1097,7 @@ const CaloryTrackerPro = () => {
             </div>
           </div>
 
-          {/* ── NUTRITION BREAKDOWN (bar chart style) ── */}
+          {/* -- NUTRITION BREAKDOWN (bar chart style) -- */}
           <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Macros</p>
             <p className="text-lg font-extrabold text-gray-800 mb-4">Nutrition Breakdown</p>
@@ -1120,7 +1120,7 @@ const CaloryTrackerPro = () => {
             ))}
           </div>
 
-          {/* ── WATER INTAKE ── */}
+          {/* -- WATER INTAKE -- */}
           <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
             <div className="flex justify-between items-start mb-4">
               <div>
@@ -1173,7 +1173,7 @@ const CaloryTrackerPro = () => {
             </div>
           </div>
 
-          {/* ── RECENT FOODS ── */}
+          {/* -- RECENT FOODS -- */}
           <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
             <div className="flex justify-between items-center mb-4">
               <div>
@@ -1238,7 +1238,7 @@ const CaloryTrackerPro = () => {
             )}
           </div>
 
-          {/* ── DAILY TIP ── */}
+          {/* -- DAILY TIP -- */}
           <div className="rounded-3xl p-5 mb-4 relative overflow-hidden"
             style={{ background: 'linear-gradient(135deg, #0D9488 0%, #0F766E 60%, #134E4A 100%)', boxShadow: '0 4px 20px rgba(13,148,136,0.25)' }}>
             <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }} />
@@ -1258,7 +1258,7 @@ const CaloryTrackerPro = () => {
     );
   };
 
-  // ── Log Food ──────────────────────────────────────────────────────────────
+  // -- Log Food --------------------------------------------------------------
   const FOOD_CATEGORIES = ['All', 'Rice & Breads', 'Curries', 'Snacks', 'Breakfast', 'Dairy & Drinks', 'Fruits', 'Proteins', 'Sweets', 'Other'];
 
   const getCategoryItems = (cat) => {
@@ -1496,7 +1496,7 @@ const CaloryTrackerPro = () => {
     );
   };
 
-  // ── Progress ──────────────────────────────────────────────────────────────
+  // -- Progress --------------------------------------------------------------
   const renderProgress = () => {
     const bmi         = calculateBMI();
     const bmiCategory = getBMICategory();
@@ -1536,7 +1536,7 @@ const CaloryTrackerPro = () => {
 
         <div className="px-4 relative" style={{ marginTop: '-60px' }}>
 
-          {/* ── Today's Stats Grid ── */}
+          {/* -- Today's Stats Grid -- */}
           <div className="grid grid-cols-2 gap-3 mb-4">
             {stats.map(s => (
               <div key={s.label} className="bg-white rounded-3xl p-4"
@@ -1570,7 +1570,7 @@ const CaloryTrackerPro = () => {
             ))}
           </div>
 
-          {/* ── BMI Card ── */}
+          {/* -- BMI Card -- */}
           <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Body Mass Index</p>
             <p className="text-lg font-extrabold text-gray-800 mb-4">BMI Analysis</p>
@@ -1635,7 +1635,7 @@ const CaloryTrackerPro = () => {
             </div>
           </div>
 
-          {/* ── 20-Day Activity Heatmap ── */}
+          {/* -- 20-Day Activity Heatmap -- */}
           <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
             <div className="flex justify-between items-start mb-4">
               <div>
@@ -1675,7 +1675,7 @@ const CaloryTrackerPro = () => {
             </div>
           </div>
 
-          {/* ── Weekly Macro Summary ── */}
+          {/* -- Weekly Macro Summary -- */}
           <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Today</p>
             <p className="text-lg font-extrabold text-gray-800 mb-4">Macro Breakdown</p>
@@ -1703,7 +1703,7 @@ const CaloryTrackerPro = () => {
     );
   };
 
-  // ── Exercise ──────────────────────────────────────────────────────────────
+  // -- Exercise --------------------------------------------------------------
   const renderExercise = () => {
     const activeEx      = exerciseDatabase.find(e => e.id === selectedExercise);
     const burnedSoFar   = Math.round((activeEx?.caloriesPerMin ?? 0) * exerciseTimer / 60);
@@ -1733,7 +1733,7 @@ const CaloryTrackerPro = () => {
 
         <div className="px-4 relative" style={{ marginTop: '-60px' }}>
 
-          {/* ── Today's Summary Strip ── */}
+          {/* -- Today's Summary Strip -- */}
           <div className="grid grid-cols-3 gap-3 mb-4">
             {[
               { icon: '⚡', label: 'Burned',    val: Math.round(totalBurned),             unit: 'kcal', color: '#EF4444', bg: '#FEF2F2' },
@@ -1749,7 +1749,7 @@ const CaloryTrackerPro = () => {
             ))}
           </div>
 
-          {/* ── Active Timer Card ── */}
+          {/* -- Active Timer Card -- */}
           {selectedExercise ? (
             <div className="bg-white rounded-3xl p-6 mb-4 text-center"
               style={{ boxShadow: '0 8px 32px rgba(220,38,38,0.12)' }}>
@@ -1825,7 +1825,7 @@ const CaloryTrackerPro = () => {
             </div>
           ) : (
 
-            /* ── Exercise Picker ── */
+            /* -- Exercise Picker -- */
             <div className="bg-white rounded-3xl p-5 mb-4"
               style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Choose Activity</p>
@@ -1857,7 +1857,7 @@ const CaloryTrackerPro = () => {
             </div>
           )}
 
-          {/* ── Today's Workout Log ── */}
+          {/* -- Today's Workout Log -- */}
           {exercises.length > 0 && (
             <div className="bg-white rounded-3xl p-5 mb-4"
               style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
@@ -1890,7 +1890,7 @@ const CaloryTrackerPro = () => {
     );
   };
 
-  // ── Profile ───────────────────────────────────────────────────────────────
+  // -- Profile ---------------------------------------------------------------
   const renderProfile = () => {
     const bmi         = calculateBMI();
     const bmiCategory = getBMICategory();
@@ -2084,7 +2084,7 @@ const CaloryTrackerPro = () => {
     );
   };
 
-  // ── Tab renderer map ──────────────────────────────────────────────────────
+  // -- Tab renderer map ------------------------------------------------------
   const renderTab = {
     home:       renderHome,
     'log-food': renderLogFood,
@@ -2093,7 +2093,7 @@ const CaloryTrackerPro = () => {
     profile:    renderProfile,
   };
 
-  // ── Main app shell ────────────────────────────────────────────────────────
+  // -- Main app shell --------------------------------------------------------
   // FIX: bottom navigation is now INSIDE the returned JSX tree, so it always
   //      renders. Previously it was placed after all the early returns, making
   //      it dead / unreachable code — the nav bar never appeared.
