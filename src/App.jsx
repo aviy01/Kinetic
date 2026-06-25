@@ -185,6 +185,101 @@ const getActivityColor = (caloriesConsumed, target = 2000) => {
 const TAB_LIST   = ['home', 'log-food', 'progress', 'exercise', 'profile'];
 const TAB_LABELS = { home: 'Home', 'log-food': 'Log Food', progress: 'Progress', exercise: 'Exercise', profile: 'Profile' };
 
+// --- Auth UI primitives -------------------------------------------------------
+// IMPORTANT: these must live at module scope, not inside the main component.
+// Defining components inside another component's body means a brand-new
+// function (and therefore a brand-new component type) is created on every
+// render. React then sees a different type at the same tree position and
+// remounts the underlying <input>, which is exactly what was destroying
+// keyboard focus after every keystroke in the login / signup / onboarding
+// forms. Keeping them here means they are defined once.
+
+const AuthShell = ({ children }) => (
+  <div style={{ minHeight:'100vh', background:'#0B0D0C', display:'flex', flexDirection:'column', position:'relative', overflow:'hidden', fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
+    {/* Faint instrument tick ring, top-right — echoes the home-screen calorie dial */}
+    <svg width="340" height="340" viewBox="0 0 340 340" style={{ position:'absolute', top:-110, right:-90, pointerEvents:'none', opacity:0.5 }}>
+      <circle cx="170" cy="170" r="150" fill="none" stroke="rgba(45,212,191,0.10)" strokeWidth="1" />
+      <circle cx="170" cy="170" r="118" fill="none" stroke="rgba(45,212,191,0.07)" strokeWidth="1" />
+      {Array.from({ length: 48 }).map((_, i) => {
+        const a = (i / 48) * Math.PI * 2;
+        const major = i % 4 === 0;
+        const r1 = major ? 150 : 150;
+        const r2 = major ? 138 : 144;
+        return (
+          <line key={i}
+            x1={170 + r1 * Math.cos(a)} y1={170 + r1 * Math.sin(a)}
+            x2={170 + r2 * Math.cos(a)} y2={170 + r2 * Math.sin(a)}
+            stroke={major ? 'rgba(45,212,191,0.22)' : 'rgba(45,212,191,0.08)'} strokeWidth={major ? 1.4 : 1} />
+        );
+      })}
+    </svg>
+    {/* Hairline baseline grid, very low contrast */}
+    <div style={{
+      position:'absolute', inset:0, pointerEvents:'none',
+      backgroundImage:'linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px)',
+      backgroundSize:'100% 64px',
+    }}/>
+    <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', flex:1 }}>
+      {children}
+    </div>
+  </div>
+);
+
+const Field = ({ label, children }) => (
+  <div>
+    <p style={{ fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'rgba(255,255,255,0.35)', marginBottom:8 }}>{label}</p>
+    {children}
+  </div>
+);
+
+const Input = (props) => (
+  <input {...props}
+    style={{
+      width:'100%', padding:'13px 16px', borderRadius:12,
+      background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
+      color:'white', fontSize:14, fontWeight:500, outline:'none',
+      boxSizing:'border-box', ...props.style,
+    }}
+  />
+);
+
+const PrimaryBtn = ({ children, onClick, disabled, style }) => (
+  <button onClick={onClick} disabled={disabled}
+    style={{
+      width:'100%', padding:'14px', borderRadius:12,
+      background:'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+      border:'none', color:'white', fontSize:14, fontWeight:700,
+      cursor:disabled?'not-allowed':'pointer', opacity:disabled?0.5:1,
+      boxShadow:'0 1px 0 rgba(255,255,255,0.1) inset, 0 8px 24px rgba(13,148,136,0.25)',
+      transition:'all 0.15s', ...style,
+    }}>
+    {children}
+  </button>
+);
+
+const GhostBtn = ({ children, onClick, style }) => (
+  <button onClick={onClick}
+    style={{
+      width:'100%', padding:'13px', borderRadius:12,
+      background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
+      color:'rgba(255,255,255,0.65)', fontSize:14, fontWeight:600,
+      cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:10,
+      transition:'all 0.15s', ...style,
+    }}>
+    {children}
+  </button>
+);
+
+const Card = ({ children, style }) => (
+  <div style={{
+    background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)',
+    borderRadius:20, padding:24, backdropFilter:'blur(12px)',
+    boxShadow:'0 24px 48px rgba(0,0,0,0.4)', ...style,
+  }}>
+    {children}
+  </div>
+);
+
 // --- Main Component -----------------------------------------------------------
 
 const CaloryTrackerPro = () => {
@@ -434,93 +529,6 @@ const CaloryTrackerPro = () => {
   // AUTH SCREENS
   // ===========================================================================
 
-  // -- AUTH -----------------------------------------------------------------
-
-  const AuthShell = ({ children }) => (
-    <div style={{ minHeight:'100vh', background:'#0B0D0C', display:'flex', flexDirection:'column', position:'relative', overflow:'hidden', fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
-      {/* Faint instrument tick ring, top-right — echoes the home-screen calorie dial */}
-      <svg width="340" height="340" viewBox="0 0 340 340" style={{ position:'absolute', top:-110, right:-90, pointerEvents:'none', opacity:0.5 }}>
-        <circle cx="170" cy="170" r="150" fill="none" stroke="rgba(45,212,191,0.10)" strokeWidth="1" />
-        <circle cx="170" cy="170" r="118" fill="none" stroke="rgba(45,212,191,0.07)" strokeWidth="1" />
-        {Array.from({ length: 48 }).map((_, i) => {
-          const a = (i / 48) * Math.PI * 2;
-          const major = i % 4 === 0;
-          const r1 = major ? 150 : 150;
-          const r2 = major ? 138 : 144;
-          return (
-            <line key={i}
-              x1={170 + r1 * Math.cos(a)} y1={170 + r1 * Math.sin(a)}
-              x2={170 + r2 * Math.cos(a)} y2={170 + r2 * Math.sin(a)}
-              stroke={major ? 'rgba(45,212,191,0.22)' : 'rgba(45,212,191,0.08)'} strokeWidth={major ? 1.4 : 1} />
-          );
-        })}
-      </svg>
-      {/* Hairline baseline grid, very low contrast */}
-      <div style={{
-        position:'absolute', inset:0, pointerEvents:'none',
-        backgroundImage:'linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px)',
-        backgroundSize:'100% 64px',
-      }}/>
-      <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', flex:1 }}>
-        {children}
-      </div>
-    </div>
-  );
-
-  const Field = ({ label, children }) => (
-    <div>
-      <p style={{ fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'rgba(255,255,255,0.35)', marginBottom:8 }}>{label}</p>
-      {children}
-    </div>
-  );
-
-  const Input = (props) => (
-    <input {...props}
-      style={{
-        width:'100%', padding:'13px 16px', borderRadius:12,
-        background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
-        color:'white', fontSize:14, fontWeight:500, outline:'none',
-        boxSizing:'border-box', ...props.style,
-      }}
-    />
-  );
-
-  const PrimaryBtn = ({ children, onClick, disabled, style }) => (
-    <button onClick={onClick} disabled={disabled}
-      style={{
-        width:'100%', padding:'14px', borderRadius:12,
-        background:'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
-        border:'none', color:'white', fontSize:14, fontWeight:700,
-        cursor:disabled?'not-allowed':'pointer', opacity:disabled?0.5:1,
-        boxShadow:'0 1px 0 rgba(255,255,255,0.1) inset, 0 8px 24px rgba(13,148,136,0.25)',
-        transition:'all 0.15s', ...style,
-      }}>
-      {children}
-    </button>
-  );
-
-  const GhostBtn = ({ children, onClick, style }) => (
-    <button onClick={onClick}
-      style={{
-        width:'100%', padding:'13px', borderRadius:12,
-        background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
-        color:'rgba(255,255,255,0.65)', fontSize:14, fontWeight:600,
-        cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:10,
-        transition:'all 0.15s', ...style,
-      }}>
-      {children}
-    </button>
-  );
-
-  const Card = ({ children, style }) => (
-    <div style={{
-      background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)',
-      borderRadius:20, padding:24, backdropFilter:'blur(12px)',
-      boxShadow:'0 24px 48px rgba(0,0,0,0.4)', ...style,
-    }}>
-      {children}
-    </div>
-  );
 
   // -- LOGIN -----------------------------------------------------------------
   if (authStep === 'login') {
@@ -814,20 +822,28 @@ const CaloryTrackerPro = () => {
                 </Field>
 
                 <Field label="Gender">
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
-                    {[{val:'male',label:'Male',emoji:'👨'},{val:'female',label:'Female',emoji:'👩'},{val:'other',label:'Other',emoji:'🧑'}].map(g => (
-                      <button key={g.val} onClick={() => setUser(u => ({...u, gender:g.val}))}
-                        style={{
-                          padding:'12px 8px', borderRadius:10,
-                          background: user.gender===g.val ? 'rgba(20,184,166,0.12)' : 'rgba(255,255,255,0.03)',
-                          border: user.gender===g.val ? '1.5px solid rgba(20,184,166,0.5)' : '1px solid rgba(255,255,255,0.07)',
-                          color: user.gender===g.val ? '#2DD4BF' : 'rgba(255,255,255,0.4)',
-                          fontSize:12, fontWeight:700, cursor:'pointer',
-                          display:'flex', flexDirection:'column', alignItems:'center', gap:4, transition:'all 0.15s',
-                        }}>
-                        <span style={{ fontSize:20 }}>{g.emoji}</span>{g.label}
-                      </button>
-                    ))}
+                  <div style={{ position:'relative' }}>
+                    <select
+                      value={user.gender || ''}
+                      onChange={e => setUser(u => ({ ...u, gender: e.target.value }))}
+                      style={{
+                        width:'100%', padding:'13px 40px 13px 16px', borderRadius:12,
+                        background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
+                        color: user.gender ? 'white' : 'rgba(255,255,255,0.35)',
+                        fontSize:14, fontWeight:500, outline:'none', appearance:'none',
+                        WebkitAppearance:'none', MozAppearance:'none',
+                        boxSizing:'border-box', cursor:'pointer',
+                      }}>
+                      <option value="" disabled style={{ color:'#111' }}>Select gender</option>
+                      <option value="male"   style={{ color:'#111' }}>Male</option>
+                      <option value="female" style={{ color:'#111' }}>Female</option>
+                      <option value="other"  style={{ color:'#111' }}>Other</option>
+                    </select>
+                    {/* Custom chevron — native select arrows look inconsistent across browsers on a dark theme */}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      style={{ position:'absolute', right:16, top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}>
+                      <path d="M6 9l6 6 6-6" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </div>
                 </Field>
 
