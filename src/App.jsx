@@ -19,6 +19,7 @@ import {
   Search,
   Plus,
   X,
+  ChevronRight,
 } from 'lucide-react';
 
 // ─── Static Data ────────────────────────────────────────────────────────────
@@ -182,7 +183,6 @@ const getActivityColor = (caloriesConsumed, target = 2000) => {
 // ─── Tab icon / label maps (defined outside component to avoid re-creation) ──
 
 const TAB_LIST   = ['home', 'log-food', 'progress', 'exercise', 'profile'];
-const TAB_ICONS  = { home: <Home size={22} />, 'log-food': <Apple size={22} />, progress: <TrendingUp size={22} />, exercise: <Zap size={22} />, profile: <User size={22} /> };
 const TAB_LABELS = { home: 'Home', 'log-food': 'Log Food', progress: 'Progress', exercise: 'Exercise', profile: 'Profile' };
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -201,6 +201,7 @@ const CaloryTrackerPro = () => {
   const [isNewUser,  setIsNewUser]  = useState(false); // toggle between Sign In / Sign Up
   const [otpSent,    setOtpSent]    = useState(false); // tracks if OTP has been sent
   const [editingProfile, setEditingProfile] = useState(false); // show edit profile form
+  const [onboardingStep, setOnboardingStep] = useState('basics'); // basics | body | goal
 
   // ── User profile ──────────────────────────────────────────────────────────
   const [user, setUser] = useState({
@@ -284,10 +285,12 @@ const CaloryTrackerPro = () => {
       setLoading(true);
       setTimeout(() => {
         setUser(u => ({ ...u, email: 'user@gmail.com', id: Math.random() }));
+        setOnboardingStep('basics');
         setAuthStep('onboarding');
         setLoading(false);
       }, 1000);
     } else {
+      setOnboardingStep('basics');
       setAuthStep('signup');
     }
   };
@@ -431,328 +434,498 @@ const CaloryTrackerPro = () => {
   // AUTH SCREENS
   // ═══════════════════════════════════════════════════════════════════════════
 
+  // ── AUTH ─────────────────────────────────────────────────────────────────
+
+  const AuthShell = ({ children }) => (
+    <div style={{ minHeight:'100vh', background:'#09090B', display:'flex', flexDirection:'column', position:'relative', overflow:'hidden' }}>
+      {/* Single clean gradient blob top-left */}
+      <div style={{
+        position:'absolute', top:'-120px', left:'-80px',
+        width:'420px', height:'420px', borderRadius:'50%',
+        background:'radial-gradient(circle, rgba(20,184,166,0.18) 0%, transparent 65%)',
+        filter:'blur(48px)', pointerEvents:'none',
+      }}/>
+      {/* Single accent blob bottom-right */}
+      <div style={{
+        position:'absolute', bottom:'-80px', right:'-60px',
+        width:'320px', height:'320px', borderRadius:'50%',
+        background:'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 65%)',
+        filter:'blur(40px)', pointerEvents:'none',
+      }}/>
+      {/* Subtle grid */}
+      <div style={{
+        position:'absolute', inset:0, pointerEvents:'none',
+        backgroundImage:'linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px)',
+        backgroundSize:'32px 32px',
+      }}/>
+      <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', flex:1 }}>
+        {children}
+      </div>
+    </div>
+  );
+
+  const Field = ({ label, children }) => (
+    <div>
+      <p style={{ fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'rgba(255,255,255,0.35)', marginBottom:8 }}>{label}</p>
+      {children}
+    </div>
+  );
+
+  const Input = (props) => (
+    <input {...props}
+      style={{
+        width:'100%', padding:'13px 16px', borderRadius:12,
+        background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
+        color:'white', fontSize:14, fontWeight:500, outline:'none',
+        boxSizing:'border-box', ...props.style,
+      }}
+    />
+  );
+
+  const PrimaryBtn = ({ children, onClick, disabled, style }) => (
+    <button onClick={onClick} disabled={disabled}
+      style={{
+        width:'100%', padding:'14px', borderRadius:12,
+        background:'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+        border:'none', color:'white', fontSize:14, fontWeight:700,
+        cursor:disabled?'not-allowed':'pointer', opacity:disabled?0.5:1,
+        boxShadow:'0 1px 0 rgba(255,255,255,0.1) inset, 0 8px 24px rgba(13,148,136,0.25)',
+        transition:'all 0.15s', ...style,
+      }}>
+      {children}
+    </button>
+  );
+
+  const GhostBtn = ({ children, onClick, style }) => (
+    <button onClick={onClick}
+      style={{
+        width:'100%', padding:'13px', borderRadius:12,
+        background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
+        color:'rgba(255,255,255,0.65)', fontSize:14, fontWeight:600,
+        cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:10,
+        transition:'all 0.15s', ...style,
+      }}>
+      {children}
+    </button>
+  );
+
+  const Card = ({ children, style }) => (
+    <div style={{
+      background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)',
+      borderRadius:20, padding:24, backdropFilter:'blur(12px)',
+      boxShadow:'0 24px 48px rgba(0,0,0,0.4)', ...style,
+    }}>
+      {children}
+    </div>
+  );
+
+  // ── LOGIN ─────────────────────────────────────────────────────────────────
   if (authStep === 'login') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6"
-        style={{ background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)' }}>
-        <div className="w-full max-w-md">
-          <div className="text-center mb-12">
-            <div className="text-6xl mb-4">🎯</div>
-            <h1 className="text-4xl font-bold text-white mb-2">CaloryTracker</h1>
-            <p className="text-teal-50">Professional Nutrition &amp; Fitness Tracking</p>
-          </div>
+      <AuthShell>
+        <div style={{ flex:1, display:'flex', flexDirection:'column', padding:'0 20px 32px' }}>
 
-          <div className="bg-white rounded-2xl p-8 shadow-2xl space-y-4">
-            <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Get Started</h2>
-
-            <button
-              onClick={() => handleLogin('email')}
-              className="w-full py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-semibold hover:shadow-lg transition"
-            >
-              <Mail className="inline mr-2" size={20} />
-              Continue with Email
-            </button>
-
-            {/* FIX: removed non-existent <Google> lucide icon; replaced with SVG inline */}
-            <button
-              onClick={() => handleLogin('google')}
-              className="w-full py-3 border-2 border-teal-500 text-teal-600 rounded-lg font-semibold hover:bg-teal-50 transition"
-            >
-              <svg className="inline mr-2 mb-0.5" width={20} height={20} viewBox="0 0 24 24" fill="currentColor">
-                <path d="M21.35 11.1H12v2.87h5.35c-.24 1.3-1 2.4-2.1 3.12v2.6h3.4c2-1.84 3.15-4.56 3.15-7.74 0-.52-.05-1.03-.15-1.53-.05-.25-.1-.5-.25-.32z" opacity=".8"/>
-                <path d="M12 22c2.7 0 4.96-.9 6.62-2.43l-3.4-2.6c-.9.6-2.04.96-3.22.96-2.48 0-4.58-1.67-5.33-3.92H3.13v2.67C4.78 19.93 8.16 22 12 22z" opacity=".8"/>
-                <path d="M6.67 14.01A5.94 5.94 0 0 1 6.35 12c0-.7.12-1.38.32-2.01V7.32H3.13A9.99 9.99 0 0 0 2 12c0 1.61.39 3.13 1.13 4.48l3.54-2.47z" opacity=".8"/>
-                <path d="M12 6.08c1.4 0 2.65.48 3.64 1.42l2.72-2.72C16.95 3.24 14.69 2.25 12 2.25 8.16 2.25 4.78 4.32 3.13 7.52l3.54 2.47C7.42 7.75 9.52 6.08 12 6.08z" opacity=".8"/>
-              </svg>
-              Continue with Google
-            </button>
-
-            <button
-              onClick={() => handleLogin('phone')}
-              className="w-full py-3 bg-white border-2 border-teal-500 text-teal-600 rounded-lg font-semibold hover:bg-teal-50 transition"
-            >
-              <Phone className="inline mr-2" size={20} />
-              Continue with Phone
-            </button>
-
-            <button
-              onClick={() => handleLogin('guest')}
-              className="w-full py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition"
-            >
-              Continue as Guest
-            </button>
-
-            <p className="text-xs text-gray-500 text-center mt-6">
-              By continuing, you agree to our Terms of Service and Privacy Policy
+          {/* Hero */}
+          <div style={{ paddingTop:72, paddingBottom:48, textAlign:'center' }}>
+            <div style={{
+              width:64, height:64, borderRadius:18, margin:'0 auto 20px',
+              background:'linear-gradient(135deg,#14B8A6,#0D9488)',
+              display:'flex', alignItems:'center', justifyContent:'center', fontSize:28,
+              boxShadow:'0 8px 32px rgba(13,148,136,0.35)',
+            }}>🎯</div>
+            <h1 style={{
+              fontSize:32, fontWeight:900, letterSpacing:'-0.8px', color:'white',
+              margin:'0 0 8px', lineHeight:1.1,
+            }}>Kinetic</h1>
+            <p style={{ fontSize:14, color:'rgba(255,255,255,0.4)', fontWeight:500, margin:0 }}>
+              Nutrition &amp; Fitness Tracking
             </p>
-
-            <div className="border-t pt-4 text-center">
-              <p className="text-sm text-gray-600">
-                Don&apos;t have an account?{' '}
-                <button
-                  onClick={() => { setIsNewUser(true); setAuthMethod('email'); setAuthStep('signup'); }}
-                  className="text-teal-600 font-bold hover:text-teal-700 underline"
-                >
-                  Sign Up
-                </button>
-              </p>
-            </div>
           </div>
+
+          {/* Auth options */}
+          <Card style={{ marginBottom:16 }}>
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+
+              {/* Email — primary */}
+              <button onClick={() => handleLogin('email')}
+                style={{
+                  width:'100%', padding:'14px 16px', borderRadius:12,
+                  background:'linear-gradient(135deg,#14B8A6,#0D9488)',
+                  border:'none', color:'white', fontSize:14, fontWeight:700,
+                  cursor:'pointer', display:'flex', alignItems:'center', gap:12,
+                  boxShadow:'0 8px 24px rgba(13,148,136,0.25), 0 1px 0 rgba(255,255,255,0.12) inset',
+                }}>
+                <div style={{ width:34, height:34, borderRadius:9, background:'rgba(255,255,255,0.15)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <Mail size={16} color="white"/>
+                </div>
+                <span style={{ flex:1, textAlign:'left' }}>Continue with Email</span>
+                <ChevronRight size={16} color="rgba(255,255,255,0.5)"/>
+              </button>
+
+              {/* Divider */}
+              <div style={{ display:'flex', alignItems:'center', gap:12, margin:'2px 0' }}>
+                <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.06)' }}/>
+                <span style={{ fontSize:11, fontWeight:600, color:'rgba(255,255,255,0.2)', letterSpacing:'0.05em' }}>OR</span>
+                <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.06)' }}/>
+              </div>
+
+              {/* Google */}
+              <GhostBtn onClick={() => handleLogin('google')}>
+                <div style={{ width:34, height:34, borderRadius:9, background:'white', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                </div>
+                Continue with Google
+              </GhostBtn>
+
+              {/* Phone */}
+              <GhostBtn onClick={() => handleLogin('phone')}>
+                <div style={{ width:34, height:34, borderRadius:9, background:'rgba(99,102,241,0.15)', border:'1px solid rgba(99,102,241,0.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <Phone size={15} color="#818CF8"/>
+                </div>
+                Continue with Phone
+              </GhostBtn>
+
+              {/* Guest */}
+              <button onClick={() => handleLogin('guest')}
+                style={{ width:'100%', padding:'11px', borderRadius:12, background:'none', border:'1px dashed rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.3)', fontSize:13, fontWeight:600, cursor:'pointer', marginTop:2 }}>
+                Skip — Browse as Guest
+              </button>
+            </div>
+          </Card>
+
+          {/* Sign up */}
+          <p style={{ textAlign:'center', fontSize:13, color:'rgba(255,255,255,0.35)', marginBottom:12 }}>
+            Don&apos;t have an account?{' '}
+            <button
+              onClick={() => { setIsNewUser(true); setAuthMethod('email'); setAuthStep('signup'); }}
+              style={{ background:'none', border:'none', color:'#2DD4BF', fontWeight:700, fontSize:13, cursor:'pointer', padding:0 }}>
+              Sign up free
+            </button>
+          </p>
+
+          <p style={{ textAlign:'center', fontSize:11, color:'rgba(255,255,255,0.15)' }}>
+            By continuing you agree to our Terms &amp; Privacy Policy
+          </p>
         </div>
-      </div>
+      </AuthShell>
     );
   }
 
+  // ── EMAIL SIGN IN / SIGN UP ───────────────────────────────────────────────
   if (authStep === 'signup' && authMethod === 'email') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-teal-500 to-teal-600 flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="text-5xl mb-3">🎯</div>
-            <h1 className="text-3xl font-bold text-white mb-2">
-              {isNewUser ? 'Create Account' : 'Welcome Back'}
+      <AuthShell>
+        <div style={{ flex:1, display:'flex', flexDirection:'column', padding:'0 20px 32px' }}>
+
+          {/* Back */}
+          <button onClick={() => { setAuthStep('login'); setIsNewUser(false); }}
+            style={{ background:'none', border:'none', color:'rgba(255,255,255,0.4)', fontSize:13, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', gap:6, padding:'20px 0 0', alignSelf:'flex-start' }}>
+            <ChevronRight size={14} style={{ transform:'rotate(180deg)' }}/> Back
+          </button>
+
+          {/* Heading */}
+          <div style={{ padding:'32px 0 28px' }}>
+            <h1 style={{ fontSize:28, fontWeight:900, color:'white', margin:'0 0 6px', letterSpacing:'-0.5px' }}>
+              {isNewUser ? 'Create account' : 'Welcome back'}
             </h1>
-            <p className="text-teal-100">
-              {isNewUser ? 'Sign up to start tracking' : 'Sign in to your account'}
+            <p style={{ fontSize:14, color:'rgba(255,255,255,0.4)', margin:0 }}>
+              {isNewUser ? 'Start your fitness journey today' : 'Sign in to continue'}
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-8 shadow-2xl space-y-4">
-            {/* Toggle tabs */}
-            <div className="flex bg-gray-100 rounded-lg p-1 mb-2">
-              <button
-                onClick={() => setIsNewUser(false)}
-                className={`flex-1 py-2 rounded-md text-sm font-semibold transition ${
-                  !isNewUser ? 'bg-teal-500 text-white shadow' : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => setIsNewUser(true)}
-                className={`flex-1 py-2 rounded-md text-sm font-semibold transition ${
-                  isNewUser ? 'bg-teal-500 text-white shadow' : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Sign Up
-              </button>
+          <Card>
+            {/* Tab toggle */}
+            <div style={{ display:'flex', background:'rgba(255,255,255,0.04)', borderRadius:10, padding:4, marginBottom:20, border:'1px solid rgba(255,255,255,0.06)' }}>
+              {[{label:'Sign In',val:false},{label:'Sign Up',val:true}].map(t => (
+                <button key={t.label} onClick={() => setIsNewUser(t.val)}
+                  style={{
+                    flex:1, padding:'10px', borderRadius:8, border:'none',
+                    background: isNewUser === t.val ? 'linear-gradient(135deg,#14B8A6,#0D9488)' : 'none',
+                    color: isNewUser === t.val ? 'white' : 'rgba(255,255,255,0.35)',
+                    fontSize:13, fontWeight:700, cursor:'pointer',
+                    boxShadow: isNewUser === t.val ? '0 4px 12px rgba(13,148,136,0.3)' : 'none',
+                    transition:'all 0.2s',
+                  }}>
+                  {t.label}
+                </button>
+              ))}
             </div>
 
-            {isNewUser && (
-              <input
-                type="text"
-                placeholder="Full Name"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-                onChange={e => setUser(u => ({ ...u, name: e.target.value }))}
-              />
-            )}
-
-            <input
-              type="email"
-              placeholder="Email Address"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-            />
-
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-              />
-              <button
-                onClick={() => setShowPassword(v => !v)}
-                className="absolute right-3 top-3 text-gray-500"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
+            <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+              {isNewUser && (
+                <Field label="Full Name">
+                  <Input type="text" placeholder="Your full name" onChange={e => setUser(u => ({...u, name: e.target.value}))} />
+                </Field>
+              )}
+              <Field label="Email">
+                <Input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+              </Field>
+              <Field label="Password">
+                <div style={{ position:'relative' }}>
+                  <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} style={{ paddingRight:44 }}/>
+                  <button onClick={() => setShowPassword(v => !v)}
+                    style={{ position:'absolute', right:14, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', color:'rgba(255,255,255,0.3)', cursor:'pointer', padding:0 }}>
+                    {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
+                  </button>
+                </div>
+              </Field>
+              {isNewUser && (
+                <Field label="Confirm Password">
+                  <Input type="password" placeholder="••••••••" />
+                </Field>
+              )}
             </div>
 
-            {isNewUser && (
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Confirm Password"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
+            <PrimaryBtn onClick={handleEmailAuth} disabled={loading} style={{ marginTop:20 }}>
+              {loading ? 'Please wait…' : isNewUser ? 'Create Account' : 'Sign In'}
+            </PrimaryBtn>
+          </Card>
+        </div>
+      </AuthShell>
+    );
+  }
+
+  // ── PHONE OTP ─────────────────────────────────────────────────────────────
+  if (authStep === 'otp') {
+    return (
+      <AuthShell>
+        <div style={{ flex:1, display:'flex', flexDirection:'column', padding:'0 20px 32px' }}>
+          <button onClick={() => { setAuthStep('login'); setOtpSent(false); setOtp(''); setPhone(''); }}
+            style={{ background:'none', border:'none', color:'rgba(255,255,255,0.4)', fontSize:13, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', gap:6, padding:'20px 0 0', alignSelf:'flex-start' }}>
+            <ChevronRight size={14} style={{ transform:'rotate(180deg)' }}/> Back
+          </button>
+
+          <div style={{ padding:'32px 0 28px' }}>
+            <div style={{ width:48, height:48, borderRadius:14, background:'rgba(99,102,241,0.15)', border:'1px solid rgba(99,102,241,0.2)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:16 }}>
+              <Phone size={20} color="#818CF8"/>
+            </div>
+            <h1 style={{ fontSize:28, fontWeight:900, color:'white', margin:'0 0 6px', letterSpacing:'-0.5px' }}>
+              {otpSent ? 'Enter code' : 'Phone number'}
+            </h1>
+            <p style={{ fontSize:14, color:'rgba(255,255,255,0.4)', margin:0 }}>
+              {otpSent ? `We sent a 6-digit code to ${phone}` : 'We'll send a verification code'}
+            </p>
+          </div>
+
+          <Card>
+            <Field label="Mobile Number">
+              <div style={{ display:'flex', gap:8 }}>
+                <Input type="tel" placeholder="+91 98765 43210"
+                  value={phone}
+                  onChange={e => { setPhone(e.target.value); setOtpSent(false); setOtp(''); }}
+                  disabled={otpSent}
+                  style={{ flex:1, opacity:otpSent?0.5:1 }}
                 />
+                {!otpSent ? (
+                  <button onClick={handleSendOTP} disabled={loading}
+                    style={{ padding:'13px 16px', borderRadius:12, background:'linear-gradient(135deg,#14B8A6,#0D9488)', border:'none', color:'white', fontSize:13, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap', opacity:loading?0.6:1 }}>
+                    {loading ? '…' : 'Send OTP'}
+                  </button>
+                ) : (
+                  <button onClick={() => { setOtpSent(false); setOtp(''); }}
+                    style={{ padding:'13px 16px', borderRadius:12, background:'rgba(99,102,241,0.1)', border:'1px solid rgba(99,102,241,0.2)', color:'#818CF8', fontSize:13, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
+                    Resend
+                  </button>
+                )}
+              </div>
+            </Field>
+
+            {otpSent && (
+              <div style={{ marginTop:16 }}>
+                <div style={{ background:'rgba(16,185,129,0.08)', border:'1px solid rgba(16,185,129,0.15)', borderRadius:10, padding:'10px 14px', marginBottom:16, display:'flex', alignItems:'center', gap:8 }}>
+                  <span style={{ fontSize:16 }}>✓</span>
+                  <p style={{ fontSize:13, color:'rgba(16,185,129,0.9)', fontWeight:600, margin:0 }}>OTP sent to {phone}</p>
+                </div>
+                <Field label="6-Digit Code">
+                  <Input type="text" placeholder="000000"
+                    value={otp} onChange={e => setOtp(e.target.value)} maxLength={6}
+                    style={{ textAlign:'center', fontSize:24, fontWeight:800, letterSpacing:'0.3em', padding:'16px' }}
+                  />
+                </Field>
+                <PrimaryBtn onClick={handleOTPSubmit} style={{ marginTop:16 }}>
+                  Verify &amp; Continue
+                </PrimaryBtn>
+              </div>
+            )}
+          </Card>
+        </div>
+      </AuthShell>
+    );
+  }
+
+  // ── ONBOARDING ────────────────────────────────────────────────────────────
+  if (authStep === 'onboarding') {
+    const steps   = ['basics','body','goal'];
+    const stepIdx = steps.indexOf(onboardingStep || 'basics');
+    const pct     = Math.round(((stepIdx + 1) / 3) * 100);
+
+    return (
+      <AuthShell>
+        <div style={{ flex:1, display:'flex', flexDirection:'column', padding:'0 20px 32px', overflowY:'auto' }}>
+
+          {/* Header */}
+          <div style={{ paddingTop:52, paddingBottom:28 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+              <p style={{ fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.3)', textTransform:'uppercase', letterSpacing:'0.08em', margin:0 }}>
+                Setting up your profile
+              </p>
+              <p style={{ fontSize:12, fontWeight:700, color:'#14B8A6', margin:0 }}>{pct}%</p>
+            </div>
+            {/* Progress bar */}
+            <div style={{ height:3, background:'rgba(255,255,255,0.06)', borderRadius:4, overflow:'hidden' }}>
+              <div style={{ height:'100%', width:`${pct}%`, background:'linear-gradient(90deg,#14B8A6,#2DD4BF)', borderRadius:4, transition:'width 0.5s ease' }}/>
+            </div>
+            {/* Step labels */}
+            <div style={{ display:'flex', justifyContent:'space-between', marginTop:8 }}>
+              {['About You','Body Stats','Your Goal'].map((s,i) => (
+                <p key={s} style={{ fontSize:11, fontWeight:600, margin:0, color: i<=stepIdx ? '#2DD4BF' : 'rgba(255,255,255,0.2)' }}>{s}</p>
+              ))}
+            </div>
+          </div>
+
+          <Card>
+            {/* STEP 1 */}
+            {(!onboardingStep || onboardingStep === 'basics') && (
+              <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+                <div style={{ marginBottom:4 }}>
+                  <h2 style={{ fontSize:22, fontWeight:900, color:'white', margin:'0 0 4px' }}>About you 👋</h2>
+                  <p style={{ fontSize:13, color:'rgba(255,255,255,0.35)', margin:0 }}>Help us personalise your experience</p>
+                </div>
+
+                <Field label="Your Name">
+                  <Input type="text" placeholder="What should we call you?" value={user.name} onChange={e => setUser(u => ({...u, name: e.target.value}))} />
+                </Field>
+
+                <Field label="Gender">
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
+                    {[{val:'male',label:'Male',emoji:'👨'},{val:'female',label:'Female',emoji:'👩'},{val:'other',label:'Other',emoji:'🧑'}].map(g => (
+                      <button key={g.val} onClick={() => setUser(u => ({...u, gender:g.val}))}
+                        style={{
+                          padding:'12px 8px', borderRadius:10,
+                          background: user.gender===g.val ? 'rgba(20,184,166,0.12)' : 'rgba(255,255,255,0.03)',
+                          border: user.gender===g.val ? '1.5px solid rgba(20,184,166,0.5)' : '1px solid rgba(255,255,255,0.07)',
+                          color: user.gender===g.val ? '#2DD4BF' : 'rgba(255,255,255,0.4)',
+                          fontSize:12, fontWeight:700, cursor:'pointer',
+                          display:'flex', flexDirection:'column', alignItems:'center', gap:4, transition:'all 0.15s',
+                        }}>
+                        <span style={{ fontSize:20 }}>{g.emoji}</span>{g.label}
+                      </button>
+                    ))}
+                  </div>
+                </Field>
+
+                <Field label="Age">
+                  <Input type="number" placeholder="Your age" value={user.age} onChange={e => setUser(u => ({...u, age:e.target.value}))} />
+                </Field>
+
+                <PrimaryBtn onClick={() => setOnboardingStep('body')}>Next →</PrimaryBtn>
               </div>
             )}
 
-            <button
-              onClick={handleEmailAuth}
-              disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50"
-            >
-              {loading ? (isNewUser ? 'Creating Account…' : 'Signing In…') : (isNewUser ? 'Create Account' : 'Sign In')}
-            </button>
-
-            <button
-              onClick={() => { setAuthStep('login'); setIsNewUser(false); }}
-              className="w-full text-teal-600 font-semibold hover:text-teal-700 text-sm"
-            >
-              ← Back to all options
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (authStep === 'otp') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-teal-500 to-teal-600 flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="text-5xl mb-3">📱</div>
-            <h1 className="text-3xl font-bold text-white mb-2">Phone Verification</h1>
-            <p className="text-teal-100">
-              {otpSent ? `OTP sent to ${phone}` : 'Enter your mobile number'}
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-8 shadow-2xl space-y-4">
-            {/* Step 1: Enter phone + Send OTP */}
-            <div className="flex gap-2">
-              <input
-                type="tel"
-                placeholder="Phone Number (+91XXXXXXXXXX)"
-                value={phone}
-                onChange={e => { setPhone(e.target.value); setOtpSent(false); setOtp(''); }}
-                disabled={otpSent}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500 disabled:bg-gray-50 disabled:text-gray-500"
-              />
-              {!otpSent && (
-                <button
-                  onClick={handleSendOTP}
-                  disabled={loading}
-                  className="px-4 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50 whitespace-nowrap"
-                >
-                  {loading ? '…' : 'Send OTP'}
-                </button>
-              )}
-              {otpSent && (
-                <button
-                  onClick={() => { setOtpSent(false); setOtp(''); }}
-                  className="px-4 py-3 border border-teal-500 text-teal-600 rounded-lg font-semibold hover:bg-teal-50 transition whitespace-nowrap text-sm"
-                >
-                  Resend
-                </button>
-              )}
-            </div>
-
-            {/* Step 2: Enter OTP — shown only after OTP is sent */}
-            {otpSent && (
-              <>
-                <div className="bg-teal-50 border border-teal-200 rounded-lg px-4 py-3 text-sm text-teal-700 text-center">
-                  ✅ OTP sent! Enter the 6-digit code below
+            {/* STEP 2 */}
+            {onboardingStep === 'body' && (
+              <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+                <div style={{ marginBottom:4 }}>
+                  <h2 style={{ fontSize:22, fontWeight:900, color:'white', margin:'0 0 4px' }}>Body stats 📏</h2>
+                  <p style={{ fontSize:13, color:'rgba(255,255,255,0.35)', margin:0 }}>Used to calculate your BMI &amp; calorie targets</p>
                 </div>
-                <input
-                  type="text"
-                  placeholder="Enter 6-digit OTP"
-                  value={otp}
-                  onChange={e => setOtp(e.target.value)}
-                  maxLength={6}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500 text-center text-2xl tracking-widest font-bold"
-                />
-                <button
-                  onClick={handleOTPSubmit}
-                  className="w-full py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-semibold hover:shadow-lg transition"
-                >
-                  Verify OTP
-                </button>
-              </>
+
+                <Field label="Height (cm)">
+                  <div style={{ position:'relative' }}>
+                    <Input type="number" placeholder="e.g. 175" value={user.height} onChange={e => setUser(u => ({...u, height:e.target.value}))} style={{ paddingRight:48 }}/>
+                    <span style={{ position:'absolute', right:16, top:'50%', transform:'translateY(-50%)', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.25)' }}>cm</span>
+                  </div>
+                </Field>
+
+                <Field label="Weight (kg)">
+                  <div style={{ position:'relative' }}>
+                    <Input type="number" placeholder="e.g. 70" value={user.weight} onChange={e => setUser(u => ({...u, weight:e.target.value}))} style={{ paddingRight:48 }}/>
+                    <span style={{ position:'absolute', right:16, top:'50%', transform:'translateY(-50%)', fontSize:12, fontWeight:700, color:'rgba(255,255,255,0.25)' }}>kg</span>
+                  </div>
+                </Field>
+
+                {/* Live BMI preview */}
+                {user.height && user.weight && (() => {
+                  const b = calculateBMI();
+                  const cat = getBMICategory();
+                  return b ? (
+                    <div style={{ padding:'14px 16px', borderRadius:12, background:'rgba(20,184,166,0.08)', border:'1px solid rgba(20,184,166,0.15)' }}>
+                      <p style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.08em', color:'rgba(255,255,255,0.35)', margin:'0 0 4px' }}>BMI Preview</p>
+                      <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                        <p style={{ fontSize:28, fontWeight:900, color:'#2DD4BF', margin:0 }}>{b}</p>
+                        {cat && <span style={{ padding:'3px 10px', borderRadius:6, background:`${cat.color}18`, color:cat.color, fontSize:12, fontWeight:700, border:`1px solid ${cat.color}30` }}>{cat.category}</span>}
+                      </div>
+                    </div>
+                  ) : null;
+                })()}
+
+                <div style={{ display:'flex', gap:10, marginTop:4 }}>
+                  <GhostBtn onClick={() => setOnboardingStep('basics')} style={{ flex:1 }}>← Back</GhostBtn>
+                  <PrimaryBtn onClick={() => setOnboardingStep('goal')} style={{ flex:2 }}>Next →</PrimaryBtn>
+                </div>
+              </div>
             )}
 
-            <button
-              onClick={() => { setAuthStep('login'); setOtpSent(false); setOtp(''); setPhone(''); }}
-              className="w-full text-teal-600 font-semibold hover:text-teal-700 text-sm"
-            >
-              ← Back to all options
-            </button>
-          </div>
+            {/* STEP 3 */}
+            {onboardingStep === 'goal' && (
+              <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+                <div style={{ marginBottom:4 }}>
+                  <h2 style={{ fontSize:22, fontWeight:900, color:'white', margin:'0 0 4px' }}>Your goal 🎯</h2>
+                  <p style={{ fontSize:13, color:'rgba(255,255,255,0.35)', margin:0 }}>We&apos;ll personalise everything around this</p>
+                </div>
+
+                <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                  {[
+                    {val:'lose',    emoji:'📉', label:'Lose Weight',    sub:'Calorie deficit · More cardio',      color:'#F87171', bg:'rgba(239,68,68,0.08)',  border:'rgba(239,68,68,0.25)'},
+                    {val:'maintain',emoji:'⚖️', label:'Maintain Weight',sub:'Balanced diet · Regular activity',  color:'#818CF8', bg:'rgba(99,102,241,0.08)', border:'rgba(99,102,241,0.25)'},
+                    {val:'gain',    emoji:'📈', label:'Gain Weight',    sub:'Calorie surplus · Strength training',color:'#34D399', bg:'rgba(16,185,129,0.08)', border:'rgba(16,185,129,0.25)'},
+                  ].map(g => (
+                    <button key={g.val} onClick={() => setUser(u => ({...u, goal:g.val}))}
+                      style={{
+                        width:'100%', padding:'14px 16px', borderRadius:12, cursor:'pointer',
+                        background: user.goal===g.val ? g.bg : 'rgba(255,255,255,0.03)',
+                        border: user.goal===g.val ? `1.5px solid ${g.border}` : '1px solid rgba(255,255,255,0.07)',
+                        display:'flex', alignItems:'center', gap:14, textAlign:'left',
+                        transition:'all 0.15s',
+                      }}>
+                      <div style={{ width:40, height:40, borderRadius:10, background:'rgba(255,255,255,0.05)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0 }}>
+                        {g.emoji}
+                      </div>
+                      <div style={{ flex:1 }}>
+                        <p style={{ fontSize:14, fontWeight:700, color:'white', margin:'0 0 2px' }}>{g.label}</p>
+                        <p style={{ fontSize:12, color:'rgba(255,255,255,0.35)', margin:0 }}>{g.sub}</p>
+                      </div>
+                      <div style={{
+                        width:18, height:18, borderRadius:'50%', flexShrink:0,
+                        background: user.goal===g.val ? g.color : 'transparent',
+                        border: `2px solid ${user.goal===g.val ? g.color : 'rgba(255,255,255,0.15)'}`,
+                        display:'flex', alignItems:'center', justifyContent:'center',
+                      }}>
+                        {user.goal===g.val && <div style={{ width:6, height:6, borderRadius:'50%', background:'white' }}/>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ display:'flex', gap:10, marginTop:4 }}>
+                  <GhostBtn onClick={() => setOnboardingStep('body')} style={{ flex:1 }}>← Back</GhostBtn>
+                  <PrimaryBtn onClick={handleOnboardingSubmit} disabled={!user.goal} style={{ flex:2 }}>
+                    🚀 Let&apos;s Go!
+                  </PrimaryBtn>
+                </div>
+              </div>
+            )}
+          </Card>
         </div>
-      </div>
+      </AuthShell>
     );
   }
 
-  if (authStep === 'onboarding') {
-    return (
-      <div
-        className="min-h-screen p-6 overflow-y-auto"
-        style={{ background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)' }}
-      >
-        <div className="w-full max-w-md mx-auto">
-          <div className="text-center mb-8 pt-4">
-            <h1 className="text-3xl font-bold text-white mb-2">Let's Get to Know You</h1>
-            <p className="text-teal-100">Complete your profile for personalised recommendations</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-8 shadow-2xl space-y-4">
-            <input
-              type="text"
-              placeholder="Full Name"
-              value={user.name}
-              onChange={e => setUser(u => ({ ...u, name: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-            />
-            <select
-              value={user.gender}
-              onChange={e => setUser(u => ({ ...u, gender: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-            >
-              <option value="">Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-            <input
-              type="number"
-              placeholder="Age"
-              value={user.age}
-              onChange={e => setUser(u => ({ ...u, age: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-            />
-            <input
-              type="number"
-              placeholder="Height (cm)"
-              value={user.height}
-              onChange={e => setUser(u => ({ ...u, height: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-            />
-            <input
-              type="number"
-              placeholder="Weight (kg)"
-              value={user.weight}
-              onChange={e => setUser(u => ({ ...u, weight: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-            />
-            <select
-              value={user.goal}
-              onChange={e => setUser(u => ({ ...u, goal: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-            >
-              <option value="">Select Your Goal</option>
-              <option value="lose">Lose Weight</option>
-              <option value="gain">Gain Weight</option>
-              <option value="maintain">Maintain Weight</option>
-            </select>
-
-            <button
-              onClick={handleOnboardingSubmit}
-              className="w-full py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-semibold hover:shadow-lg transition mt-6"
-            >
-              Start Tracking
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
   // MAIN APP  (authStep === 'app')
   // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1081,6 +1254,7 @@ const CaloryTrackerPro = () => {
 
         </div>
       </div>
+    </div>
     );
   };
 
@@ -1104,147 +1278,221 @@ const CaloryTrackerPro = () => {
   };
 
   const renderLogFood = () => {
-    const filteredFoods = getCategoryItems(foodCategory).filter(f =>
+    const filteredFoods    = getCategoryItems(foodCategory).filter(f =>
       f.name.toLowerCase().includes(foodSearch.toLowerCase())
     );
     const selectedFoodItem = foodDatabase.find(f => f.id === selectedFood);
+    const totalLogged      = foodItems.reduce((s, f) => s + f.calories, 0);
+    const mealIcons        = ['🍛','🥗','🍱','🥘','🍲','🥙','🫓','🥚','🍜','🥞'];
+    const catEmojis = {
+      'All':'🍽️','Rice & Breads':'🍚','Curries':'🍛','Snacks':'🥨',
+      'Breakfast':'🌅','Dairy & Drinks':'🥛','Fruits':'🍎',
+      'Proteins':'💪','Sweets':'🍬','Other':'🥦',
+    };
 
     return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      <div style={{ background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)' }} className="text-white p-6 pt-8">
-        <h1 className="text-2xl font-bold">Log Food 🍎</h1>
-        <p className="text-teal-50">100+ Indian &amp; global foods</p>
-      </div>
+      <div className="min-h-screen pb-28" style={{ backgroundColor: '#F0F4F8' }}>
 
-      <div className="px-6 py-6">
-        <div className="bg-white rounded-2xl p-5 shadow-sm mb-6">
+        {/* Header */}
+        <div className="relative px-5 pt-10 pb-20 overflow-hidden"
+          style={{ background: 'linear-gradient(145deg,#059669 0%,#047857 50%,#064E3B 100%)' }}>
+          <div className="absolute -top-8 -right-8 w-44 h-44 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }} />
+          <div className="absolute top-14 -right-4 w-24 h-24 rounded-full" style={{ background: 'rgba(255,255,255,0.04)' }} />
+          <p className="text-emerald-200 text-xs font-bold uppercase tracking-widest mb-1">Nutrition</p>
+          <h1 className="text-3xl font-black text-white">Log Food</h1>
+          <p className="text-emerald-200 text-sm mt-1">100+ Indian &amp; global foods</p>
+        </div>
 
-          {/* Search bar */}
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search roti, biryani, dal, chicken…"
-              value={foodSearch}
-              onChange={e => { setFoodSearch(e.target.value); setFoodCategory('All'); }}
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-teal-500 bg-gray-50 text-sm"
-            />
-          </div>
+        <div className="px-4 relative" style={{ marginTop: '-60px' }}>
 
-          {/* Category pills */}
-          <div className="flex gap-2 overflow-x-auto pb-2 mb-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            {FOOD_CATEGORIES.map(cat => (
-              <button
-                key={cat}
-                onClick={() => { setFoodCategory(cat); setFoodSearch(''); setSelectedFood(null); }}
-                className="whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-semibold transition"
-                style={{
-                  background: foodCategory === cat ? '#0D9488' : '#F0FDFA',
-                  color:      foodCategory === cat ? '#ffffff' : '#0D9488',
-                  border:     foodCategory === cat ? '1.5px solid #0D9488' : '1.5px solid #99f6e4',
-                }}
-              >
-                {cat}
-              </button>
+          {/* Summary strip */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            {[
+              { icon:'🍽️', label:'Logged',   val:foodItems.length,                                                unit:'items', color:'#059669' },
+              { icon:'🔥', label:'Consumed',  val:Math.round(totalLogged),                                        unit:'kcal',  color:'#0D9488' },
+              { icon:'⚡', label:'Remaining', val:Math.max(0,Math.round(dailyData.targetCalories - totalLogged)), unit:'kcal',  color:'#F97316' },
+            ].map(s => (
+              <div key={s.label} className="bg-white rounded-2xl p-3.5 text-center"
+                style={{ boxShadow:'0 4px 16px rgba(0,0,0,0.07)' }}>
+                <div className="text-xl mb-1">{s.icon}</div>
+                <p className="text-lg font-black" style={{ color:s.color }}>
+                  {s.val}<span className="text-xs font-semibold text-gray-400 ml-0.5">{s.unit}</span>
+                </p>
+                <p className="text-xs text-gray-400 font-medium">{s.label}</p>
+              </div>
             ))}
           </div>
 
-          {/* Selected food card */}
-          {selectedFoodItem && (
-            <div className="mb-4 p-4 bg-teal-50 rounded-xl border border-teal-200">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <p className="font-bold text-gray-800 text-sm leading-snug">{selectedFoodItem.name}</p>
-                  <p className="text-xs text-teal-600 mt-0.5">{selectedFoodItem.calories} kcal per serving</p>
-                </div>
-                <button onClick={() => setSelectedFood(null)} className="text-gray-400 hover:text-gray-600 ml-2">
-                  <X size={16} />
+          {/* Search + Category + List */}
+          <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Database</p>
+            <p className="text-lg font-extrabold text-gray-800 mb-4">Find Food</p>
+
+            {/* Search */}
+            <div className="relative mb-4">
+              <Search className="absolute left-3.5 top-3.5 text-gray-400" size={17} />
+              <input type="text"
+                placeholder="Search roti, biryani, dal, chicken…"
+                value={foodSearch}
+                onChange={e => { setFoodSearch(e.target.value); setFoodCategory('All'); }}
+                className="w-full pl-10 pr-4 py-3 rounded-2xl text-sm font-medium focus:outline-none"
+                style={{ background:'#F8FAFB', border:'1.5px solid #E5E7EB' }}
+              />
+            </div>
+
+            {/* Category pills */}
+            <div className="flex gap-2 overflow-x-auto pb-2 mb-4"
+              style={{ scrollbarWidth:'none', msOverflowStyle:'none' }}>
+              {FOOD_CATEGORIES.map(cat => (
+                <button key={cat}
+                  onClick={() => { setFoodCategory(cat); setFoodSearch(''); setSelectedFood(null); }}
+                  className="whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition active:scale-95"
+                  style={{
+                    background: foodCategory === cat ? '#059669' : '#F0FDF4',
+                    color:      foodCategory === cat ? '#fff'    : '#059669',
+                    border:     foodCategory === cat ? '1.5px solid #059669' : '1.5px solid #A7F3D0',
+                  }}>
+                  {catEmojis[cat]} {cat}
                 </button>
+              ))}
+            </div>
+
+            {/* Selected food detail */}
+            {selectedFoodItem && (
+              <div className="mb-4 rounded-2xl overflow-hidden"
+                style={{ border:'1.5px solid #A7F3D0', boxShadow:'0 4px 16px rgba(5,150,105,0.1)' }}>
+                <div className="px-4 py-3 flex justify-between items-start"
+                  style={{ background:'linear-gradient(135deg,#ECFDF5,#D1FAE5)' }}>
+                  <div>
+                    <p className="font-extrabold text-gray-800 text-sm">{selectedFoodItem.name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-lg font-black" style={{ color:'#059669' }}>{selectedFoodItem.calories}</span>
+                      <span className="text-xs text-gray-500 font-semibold">kcal / serving</span>
+                    </div>
+                  </div>
+                  <button onClick={() => setSelectedFood(null)}
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-emerald-600"
+                    style={{ background:'rgba(255,255,255,0.6)' }}>
+                    <X size={14} />
+                  </button>
+                </div>
+                <div className="grid grid-cols-4" style={{ borderTop:'1px solid #D1FAE5' }}>
+                  {[
+                    { label:'Protein', val:selectedFoodItem.protein, color:'#0D9488', bg:'#F0FDF9' },
+                    { label:'Carbs',   val:selectedFoodItem.carbs,   color:'#F97316', bg:'#FFF7ED' },
+                    { label:'Fat',     val:selectedFoodItem.fat,     color:'#EF4444', bg:'#FEF2F2' },
+                    { label:'Fiber',   val:selectedFoodItem.fiber,   color:'#6366F1', bg:'#EEF2FF' },
+                  ].map((m,i) => (
+                    <div key={m.label}
+                      className={`flex flex-col items-center py-2.5 ${i < 3 ? 'border-r' : ''}`}
+                      style={{ background:m.bg, borderColor:'#E5E7EB' }}>
+                      <p className="text-sm font-black" style={{ color:m.color }}>{m.val}<span className="text-xs">g</span></p>
+                      <p className="text-xs text-gray-400 mt-0.5">{m.label}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2 p-3" style={{ background:'#FAFFFE' }}>
+                  <input type="number"
+                    placeholder="Qty (1 = 1 serving)"
+                    value={foodQuantity}
+                    onChange={e => setFoodQuantity(e.target.value)}
+                    className="flex-1 px-3 py-2.5 rounded-xl text-sm font-medium focus:outline-none"
+                    style={{ background:'#F0FDF4', border:'1.5px solid #A7F3D0', color:'#064E3B' }}
+                  />
+                  <button onClick={handleAddFood}
+                    className="px-5 py-2.5 rounded-xl font-bold text-white flex items-center gap-1.5 text-sm active:scale-95"
+                    style={{ background:'linear-gradient(135deg,#059669,#047857)', boxShadow:'0 4px 12px rgba(5,150,105,0.3)' }}>
+                    <Plus size={16} /> Add
+                  </button>
+                </div>
               </div>
-              <div className="grid grid-cols-4 gap-2 mb-3">
-                {[
-                  { label: 'Protein', val: selectedFoodItem.protein, color: 'text-teal-700', bg: 'bg-teal-100' },
-                  { label: 'Carbs',   val: selectedFoodItem.carbs,   color: 'text-orange-700', bg: 'bg-orange-100' },
-                  { label: 'Fat',     val: selectedFoodItem.fat,     color: 'text-red-700',    bg: 'bg-red-100'    },
-                  { label: 'Fiber',   val: selectedFoodItem.fiber,   color: 'text-blue-700',   bg: 'bg-blue-100'   },
-                ].map(({ label, val, color, bg }) => (
-                  <div key={label} className={`${bg} rounded-lg p-2 text-center`}>
-                    <p className="text-xs text-gray-500">{label}</p>
-                    <p className={`text-xs font-bold ${color}`}>{val}g</p>
+            )}
+
+            {/* Food list */}
+            <div className="space-y-2 overflow-y-auto" style={{ maxHeight:280 }}>
+              {filteredFoods.length === 0 ? (
+                <div className="flex flex-col items-center py-8 text-center">
+                  <div className="text-4xl mb-2">🔍</div>
+                  <p className="text-sm font-semibold text-gray-500">No foods found</p>
+                  <p className="text-xs text-gray-400 mt-1">Try a different search or category</p>
+                </div>
+              ) : filteredFoods.map(food => (
+                <button key={food.id}
+                  onClick={() => { setSelectedFood(food.id); setFoodSearch(''); setFoodQuantity(''); }}
+                  className="w-full text-left p-3 rounded-2xl transition"
+                  style={{
+                    background: selectedFood === food.id ? '#ECFDF5' : '#F8FAFB',
+                    border:     selectedFood === food.id ? '1.5px solid #6EE7B7' : '1.5px solid #F1F5F9',
+                  }}>
+                  <div className="flex justify-between items-center">
+                    <p className="font-bold text-gray-800 text-sm flex-1 pr-2">{food.name}</p>
+                    <div className="shrink-0 text-right">
+                      <p className="text-sm font-extrabold" style={{ color:'#059669' }}>{food.calories}</p>
+                      <p className="text-xs text-gray-400">kcal</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    {[{l:'P',v:food.protein,c:'#0D9488'},{l:'C',v:food.carbs,c:'#F97316'},{l:'F',v:food.fat,c:'#EF4444'}].map(m => (
+                      <span key={m.l} className="text-xs font-semibold px-1.5 py-0.5 rounded-md"
+                        style={{ background:m.c+'18', color:m.c }}>
+                        {m.l}: {m.v}g
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Meal Log */}
+          {foodItems.length > 0 && (
+            <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Today</p>
+                  <p className="text-lg font-extrabold text-gray-800">Meal Log</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-black" style={{ color:'#059669' }}>{Math.round(totalLogged)}</p>
+                  <p className="text-xs text-gray-400">total kcal</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {foodItems.map((food, idx) => (
+                  <div key={food.id} className="flex items-center gap-3 p-3 rounded-2xl"
+                    style={{ background:'#F8FAFB', border:'1px solid #F1F5F9' }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
+                      style={{ background:'#ECFDF5' }}>
+                      {mealIcons[idx % mealIcons.length]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-gray-800 truncate">{food.name}</p>
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        <span className="text-xs text-gray-400">×{food.quantity}</span>
+                        {[{l:'P',v:food.protein,c:'#0D9488'},{l:'C',v:food.carbs,c:'#F97316'},{l:'F',v:food.fat,c:'#EF4444'}].map(m => (
+                          <span key={m.l} className="text-xs font-semibold" style={{ color:m.c }}>{m.l}:{Math.round(m.v)}g</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="shrink-0 flex items-center gap-2">
+                      <div className="text-right">
+                        <p className="text-sm font-extrabold" style={{ color:'#059669' }}>{Math.round(food.calories)}</p>
+                        <p className="text-xs text-gray-400">kcal</p>
+                      </div>
+                      <button onClick={() => handleRemoveFood(food.id)}
+                        className="w-7 h-7 rounded-xl flex items-center justify-center"
+                        style={{ background:'#FEF2F2', color:'#EF4444' }}>
+                        <X size={14} />
+                      </button>
+                    </div>
                   </div>
                 ))}
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder="Qty (1 = 1 serving)"
-                  value={foodQuantity}
-                  onChange={e => setFoodQuantity(e.target.value)}
-                  className="flex-1 px-3 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:border-teal-500 text-sm"
-                />
-                <button
-                  onClick={handleAddFood}
-                  className="px-5 py-2.5 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition flex items-center gap-1.5 text-sm"
-                >
-                  <Plus size={16} /> Add
-                </button>
               </div>
             </div>
           )}
 
-          {/* Food list */}
-          <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-            {filteredFoods.length === 0 ? (
-              <p className="text-center text-sm text-gray-400 py-6">No foods found. Try a different search.</p>
-            ) : (
-              filteredFoods.map(food => (
-                <button
-                  key={food.id}
-                  onClick={() => { setSelectedFood(food.id); setFoodSearch(''); setFoodQuantity(''); }}
-                  className={`w-full text-left p-3 rounded-xl transition border ${
-                    selectedFood === food.id
-                      ? 'bg-teal-50 border-teal-400'
-                      : 'bg-gray-50 border-gray-100 hover:bg-teal-50 hover:border-teal-300'
-                  }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <p className="font-semibold text-gray-800 text-sm">{food.name}</p>
-                    <div className="text-right ml-2 shrink-0">
-                      <p className="text-sm font-bold text-teal-600">{food.calories}</p>
-                      <p className="text-xs text-gray-400">kcal</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-400 mt-0.5">P: {food.protein}g · C: {food.carbs}g · F: {food.fat}g</p>
-                </button>
-              ))
-            )}
-          </div>
         </div>
-
-        {/* Today's logged meals */}
-        {foodItems.length > 0 && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Today's Meals</h3>
-            <div className="space-y-3">
-              {foodItems.map(food => (
-                <div
-                  key={food.id}
-                  className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border-l-4 border-teal-500"
-                >
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-800 text-sm">{food.name} × {food.quantity}</p>
-                    <p className="text-xs text-gray-500">{Math.round(food.calories)} kcal · P: {Math.round(food.protein)}g · C: {Math.round(food.carbs)}g</p>
-                  </div>
-                  <button onClick={() => handleRemoveFood(food.id)} className="text-red-400 hover:text-red-600 ml-2">
-                    <X size={18} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
-    </div>
     );
   };
 
@@ -1643,156 +1891,198 @@ const CaloryTrackerPro = () => {
   };
 
   // ── Profile ───────────────────────────────────────────────────────────────
-  const renderProfile = () => (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      <div style={{ background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)' }} className="text-white p-6 pt-8">
-        <h1 className="text-2xl font-bold">Profile 👤</h1>
-        <p className="text-teal-50">Manage your information</p>
-      </div>
+  const renderProfile = () => {
+    const bmi         = calculateBMI();
+    const bmiCategory = getBMICategory();
+    const goalLabel   = user.goal === 'lose' ? 'Lose Weight' : user.goal === 'gain' ? 'Gain Weight' : user.goal === 'maintain' ? 'Maintain Weight' : '—';
+    const goalEmoji   = user.goal === 'lose' ? '📉' : user.goal === 'gain' ? '📈' : user.goal === 'maintain' ? '⚖️' : '🎯';
+    const initials    = (user.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
 
-      <div className="px-6 py-6">
-        {/* Avatar */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm text-center mb-6">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-4xl mx-auto mb-4">
-            👤
+    return (
+      <div className="min-h-screen pb-28" style={{ backgroundColor: '#F0F4F8' }}>
+
+        {/* Header with avatar */}
+        <div className="relative px-5 pt-10 pb-24 overflow-hidden"
+          style={{ background: 'linear-gradient(145deg,#0F172A 0%,#1E293B 50%,#0F172A 100%)' }}>
+          <div className="absolute -top-8 -right-8 w-48 h-48 rounded-full" style={{ background: 'rgba(99,102,241,0.12)' }} />
+          <div className="absolute top-16 -right-4 w-28 h-28 rounded-full" style={{ background: 'rgba(99,102,241,0.07)' }} />
+          <div className="absolute -bottom-6 -left-6 w-36 h-36 rounded-full" style={{ background: 'rgba(99,102,241,0.06)' }} />
+
+          <div className="relative z-10 flex items-start gap-4">
+            {/* Avatar */}
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black text-white shrink-0"
+              style={{ background: 'linear-gradient(135deg,#6366F1,#4F46E5)', boxShadow: '0 4px 20px rgba(99,102,241,0.4)' }}>
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-0.5">Your Profile</p>
+              <h1 className="text-2xl font-black text-white truncate">{user.name || 'Guest User'}</h1>
+              <p className="text-slate-400 text-sm truncate">{user.email || 'No email'}</p>
+              {bmi && bmiCategory && (
+                <div className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg"
+                  style={{ background: bmiCategory.color + '22', border: `1px solid ${bmiCategory.color}44` }}>
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: bmiCategory.color }} />
+                  <p className="text-xs font-bold" style={{ color: bmiCategory.color }}>BMI {bmi} · {bmiCategory.category}</p>
+                </div>
+              )}
+            </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800">{user.name}</h2>
-          <p className="text-gray-600">{user.email || 'Guest User'}</p>
-          {!user.isGuest && user.id && (
-            <p className="text-xs text-gray-400 mt-1">ID: {user.id}</p>
-          )}
         </div>
 
-        {/* Details */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Your Information</h3>
-          <div className="space-y-2">
+        <div className="px-4 relative" style={{ marginTop: '-52px' }}>
+
+          {/* Stats row */}
+          <div className="grid grid-cols-4 gap-2 mb-4">
             {[
-              ['Gender', user.gender || '—'],
-              ['Age',    user.age    ? `${user.age} years` : '—'],
-              ['Height', user.height ? `${user.height} cm` : '—'],
-              ['Weight', user.weight ? `${user.weight} kg` : '—'],
-              ['BMI',    calculateBMI() || '—'],
-              ['Goal',
-                user.goal === 'lose'     ? 'Lose Weight'     :
-                user.goal === 'gain'     ? 'Gain Weight'     :
-                user.goal === 'maintain' ? 'Maintain Weight' : '—'],
-            ].map(([label, value]) => (
-              <div key={label} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-gray-600 text-sm">{label}</span>
-                <span className="font-semibold text-gray-800 capitalize text-sm">{value}</span>
+              { label:'Age',    val: user.age    ? `${user.age}y`    : '—', icon:'🎂', color:'#6366F1' },
+              { label:'Height', val: user.height ? `${user.height}cm`: '—', icon:'📏', color:'#0D9488' },
+              { label:'Weight', val: user.weight ? `${user.weight}kg`: '—', icon:'⚖️', color:'#F97316' },
+              { label:'BMI',    val: bmi || '—',                             icon:'❤️', color: bmiCategory?.color || '#EF4444' },
+            ].map(s => (
+              <div key={s.label} className="bg-white rounded-2xl p-3 text-center"
+                style={{ boxShadow:'0 4px 16px rgba(0,0,0,0.08)' }}>
+                <div className="text-lg mb-1">{s.icon}</div>
+                <p className="text-sm font-black" style={{ color:s.color }}>{s.val}</p>
+                <p className="text-xs text-gray-400 font-medium">{s.label}</p>
               </div>
             ))}
           </div>
-        </div>
 
-        {/* Edit Profile */}
-        {!editingProfile ? (
-          <button
-            onClick={() => setEditingProfile(true)}
-            className="w-full py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-semibold hover:shadow-lg transition mb-4 flex items-center justify-center gap-2"
-          >
-            <Settings size={18} /> Edit Profile
-          </button>
-        ) : (
-          <div className="bg-white rounded-2xl p-6 shadow-sm mb-4 space-y-3">
-            <h3 className="text-lg font-bold text-gray-800 mb-2">Edit Your Profile</h3>
-
-            <input
-              type="text"
-              placeholder="Full Name"
-              value={user.name}
-              onChange={e => setUser(u => ({ ...u, name: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-            />
-            <select
-              value={user.gender}
-              onChange={e => setUser(u => ({ ...u, gender: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-            >
-              <option value="">Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-            <input
-              type="number"
-              placeholder="Age"
-              value={user.age}
-              onChange={e => setUser(u => ({ ...u, age: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-            />
-            <input
-              type="number"
-              placeholder="Height (cm)"
-              value={user.height}
-              onChange={e => setUser(u => ({ ...u, height: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-            />
-            <input
-              type="number"
-              placeholder="Weight (kg)"
-              value={user.weight}
-              onChange={e => setUser(u => ({ ...u, weight: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-            />
-            <select
-              value={user.goal}
-              onChange={e => setUser(u => ({ ...u, goal: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
-            >
-              <option value="">Select Your Goal</option>
-              <option value="lose">Lose Weight</option>
-              <option value="gain">Gain Weight</option>
-              <option value="maintain">Maintain Weight</option>
-            </select>
-
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={() => setEditingProfile(false)}
-                className="flex-1 py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-semibold hover:shadow-lg transition"
-              >
-                Save Changes
-              </button>
-              <button
-                onClick={() => setEditingProfile(false)}
-                className="flex-1 py-3 border-2 border-gray-300 text-gray-600 rounded-lg font-semibold hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
+          {/* Goal card */}
+          <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Fitness</p>
+            <p className="text-lg font-extrabold text-gray-800 mb-3">Your Goal</p>
+            <div className="flex items-center gap-4 p-4 rounded-2xl"
+              style={{ background:'linear-gradient(135deg,#EEF2FF,#E0E7FF)', border:'1.5px solid #C7D2FE' }}>
+              <span className="text-3xl">{goalEmoji}</span>
+              <div>
+                <p className="font-black text-indigo-800 text-base">{goalLabel}</p>
+                <p className="text-xs text-indigo-500 mt-0.5">
+                  {user.goal === 'lose' ? 'Caloric deficit · More cardio'
+                    : user.goal === 'gain' ? 'Caloric surplus · Strength training'
+                    : user.goal === 'maintain' ? 'Balanced diet · Regular activity'
+                    : 'Set a goal to get personalised tips'}
+                </p>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Settings */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Settings size={20} /> Settings
-          </h3>
-          <div className="space-y-3">
-            {[
-              { label: 'Notifications', sub: 'Manage alerts'  },
-              { label: 'Privacy',       sub: 'Data security'  },
-              { label: 'About',         sub: 'Version 1.0.0'  },
-            ].map(({ label, sub }) => (
-              <button key={label} className="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition">
-                <p className="font-semibold text-gray-800 text-sm">{label}</p>
-                <p className="text-xs text-gray-500">{sub}</p>
-              </button>
-            ))}
+          {/* Edit Profile */}
+          {!editingProfile ? (
+            <button onClick={() => setEditingProfile(true)}
+              className="w-full py-4 rounded-2xl font-bold text-white flex items-center justify-center gap-2 mb-4 transition active:scale-95"
+              style={{ background:'linear-gradient(135deg,#6366F1,#4F46E5)', boxShadow:'0 4px 16px rgba(99,102,241,0.3)' }}>
+              <Settings size={18} /> Edit Profile
+            </button>
+          ) : (
+            <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Edit</p>
+              <p className="text-lg font-extrabold text-gray-800 mb-4">Your Information</p>
+              <div className="space-y-3">
+                {[
+                  { label:'Full Name',    key:'name',   type:'text',   placeholder:'Your full name'    },
+                  { label:'Age',          key:'age',    type:'number', placeholder:'Your age'          },
+                  { label:'Height (cm)',  key:'height', type:'number', placeholder:'Height in cm'      },
+                  { label:'Weight (kg)',  key:'weight', type:'number', placeholder:'Weight in kg'      },
+                ].map(f => (
+                  <div key={f.key}>
+                    <p className="text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">{f.label}</p>
+                    <input type={f.type} placeholder={f.placeholder}
+                      value={user[f.key] || ''}
+                      onChange={e => setUser(u => ({ ...u, [f.key]: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-2xl text-sm font-medium focus:outline-none"
+                      style={{ background:'#F8FAFB', border:'1.5px solid #E5E7EB' }}
+                    />
+                  </div>
+                ))}
+                <div>
+                  <p className="text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Gender</p>
+                  <select value={user.gender || ''}
+                    onChange={e => setUser(u => ({ ...u, gender: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-2xl text-sm font-medium focus:outline-none"
+                    style={{ background:'#F8FAFB', border:'1.5px solid #E5E7EB' }}>
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">Fitness Goal</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { val:'lose',     label:'Lose Weight', emoji:'📉', color:'#EF4444', bg:'#FEF2F2', border:'#FECACA' },
+                      { val:'maintain', label:'Maintain',    emoji:'⚖️', color:'#6366F1', bg:'#EEF2FF', border:'#C7D2FE' },
+                      { val:'gain',     label:'Gain Weight', emoji:'📈', color:'#059669', bg:'#ECFDF5', border:'#A7F3D0' },
+                    ].map(g => (
+                      <button key={g.val}
+                        onClick={() => setUser(u => ({ ...u, goal: g.val }))}
+                        className="py-3 rounded-2xl text-xs font-bold transition active:scale-95"
+                        style={{
+                          background: user.goal === g.val ? g.bg    : '#F8FAFB',
+                          border:     user.goal === g.val ? `2px solid ${g.color}` : '2px solid #E5E7EB',
+                          color:      user.goal === g.val ? g.color  : '#9CA3AF',
+                        }}>
+                        <div className="text-lg mb-1">{g.emoji}</div>
+                        {g.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 mt-5">
+                <button onClick={() => setEditingProfile(false)}
+                  className="flex-1 py-3.5 rounded-2xl font-bold text-white transition active:scale-95"
+                  style={{ background:'linear-gradient(135deg,#6366F1,#4F46E5)', boxShadow:'0 4px 12px rgba(99,102,241,0.3)' }}>
+                  Save Changes
+                </button>
+                <button onClick={() => setEditingProfile(false)}
+                  className="flex-1 py-3.5 rounded-2xl font-bold transition active:scale-95"
+                  style={{ background:'#F1F5F9', color:'#6B7280', border:'2px solid #E5E7EB' }}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Settings */}
+          <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">App</p>
+            <p className="text-lg font-extrabold text-gray-800 mb-3">Settings</p>
+            <div className="space-y-1">
+              {[
+                { icon:'🔔', label:'Notifications',  sub:'Meal reminders & alerts',    color:'#F97316' },
+                { icon:'🔒', label:'Privacy',         sub:'Data & security settings',   color:'#6366F1' },
+                { icon:'ℹ️', label:'About Kinetic',   sub:'Version 1.0.0',              color:'#0D9488' },
+              ].map(s => (
+                <button key={s.label}
+                  className="w-full flex items-center gap-3 p-3.5 rounded-2xl transition active:scale-98"
+                  style={{ background:'#F8FAFB' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
+                    style={{ background:s.color+'18' }}>
+                    {s.icon}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-bold text-gray-800">{s.label}</p>
+                    <p className="text-xs text-gray-400">{s.sub}</p>
+                  </div>
+                  <ChevronRight size={16} color="#D1D5DB" />
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Logout */}
-        <button
-          onClick={() => setAuthStep('login')}
-          className="w-full py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition flex items-center justify-center gap-2"
-        >
-          <LogOut size={20} /> Logout
-        </button>
+          {/* Logout */}
+          <button onClick={() => setAuthStep('login')}
+            className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 mb-4 transition active:scale-95"
+            style={{ background:'#FEF2F2', color:'#EF4444', border:'2px solid #FECACA' }}>
+            <LogOut size={18} /> Sign Out
+          </button>
+
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // ── Tab renderer map ──────────────────────────────────────────────────────
   const renderTab = {
@@ -1814,20 +2104,29 @@ const CaloryTrackerPro = () => {
 
       {/* Bottom navigation — always visible */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 shadow-2xl z-40">
-        {TAB_LIST.map(tab => (
-          <button
-            key={tab}
-            onClick={() => { setCurrentTab(tab); setShowProfileMenu(false); }}
-            className="flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition"
-            style={{
-              color:      currentTab === tab ? '#0D9488' : '#6B7280',
-              background: currentTab === tab ? '#F0FDFA' : 'transparent',
-            }}
-          >
-            {TAB_ICONS[tab]}
-            <span className="text-xs font-semibold">{TAB_LABELS[tab]}</span>
-          </button>
-        ))}
+        {TAB_LIST.map(tab => {
+          const tabIcon = {
+            home:      <Home size={22} />,
+            'log-food':<Apple size={22} />,
+            progress:  <TrendingUp size={22} />,
+            exercise:  <Zap size={22} />,
+            profile:   <User size={22} />,
+          }[tab];
+          return (
+            <button
+              key={tab}
+              onClick={() => { setCurrentTab(tab); setShowProfileMenu(false); }}
+              className="flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition"
+              style={{
+                color:      currentTab === tab ? '#0D9488' : '#6B7280',
+                background: currentTab === tab ? '#F0FDFA' : 'transparent',
+              }}
+            >
+              {tabIcon}
+              <span className="text-xs font-semibold">{TAB_LABELS[tab]}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
