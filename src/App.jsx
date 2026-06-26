@@ -893,8 +893,17 @@ const CaloryTrackerProInner = () => {
                     if (!val || val <= 0) setDailyData(prev => ({ ...prev, targetCalories: 2000 }));
                   }}
                   min={1}
-                  className="w-14 text-xs font-bold text-center bg-transparent focus:outline-none"
-                  style={{ color: '#0D9488' }}
+                  className="w-14 text-xs font-bold text-center focus:outline-none transition-shadow"
+                  style={{
+                    color: '#0F766E',
+                    background: 'white',
+                    border: '1.5px solid #99F6E4',
+                    borderRadius: 8,
+                    padding: '4px 2px',
+                    boxShadow: '0 1px 2px rgba(13,148,136,0.12)',
+                  }}
+                  onFocus={e => { e.target.style.borderColor = '#0D9488'; e.target.style.boxShadow = '0 0 0 3px rgba(13,148,136,0.15)'; }}
+                  onBlurCapture={e => { e.target.style.borderColor = '#99F6E4'; e.target.style.boxShadow = '0 1px 2px rgba(13,148,136,0.12)'; }}
                   placeholder="2000"
                 />
                 <span className="text-xs font-semibold" style={{ color: '#5EEAD4' }}>kcal</span>
