@@ -376,7 +376,6 @@ const CaloryTrackerPro = () => {
     } else if (method === 'phone') {
       setAuthStep('otp');
     } else if (method === 'google') {
-      // Google auth: simulate OAuth and land on onboarding/home
       setLoading(true);
       setTimeout(() => {
         setUser(u => ({ ...u, email: 'user@gmail.com', id: Math.random() }));
@@ -384,9 +383,6 @@ const CaloryTrackerPro = () => {
         setAuthStep('onboarding');
         setLoading(false);
       }, 1000);
-    } else {
-      setOnboardingStep('basics');
-      setAuthStep('signup');
     }
   };
 
@@ -547,18 +543,17 @@ const CaloryTrackerPro = () => {
             </svg>
             <h1 style={{
               fontSize:30, fontWeight:800, letterSpacing:'-0.6px', color:'white',
-              margin:'0 0 6px', lineHeight:1.1, fontFamily:'Georgia, "Times New Roman", serif',
+              margin:'0 0 6px', lineHeight:1.1,
             }}>Kinetic</h1>
-            <p style={{ fontSize:13, color:'rgba(255,255,255,0.38)', fontWeight:500, margin:'0 0 20px', letterSpacing:'0.01em' }}>
+            <p style={{ fontSize:13, color:'rgba(255,255,255,0.38)', fontWeight:500, margin:'0 0 20px' }}>
               Precision nutrition tracking
             </p>
-            {/* Credibility strip */}
             <div style={{ display:'inline-flex', alignItems:'center', gap:18, padding:'10px 18px', borderRadius:12, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.06)' }}>
               {[['100+','Indian foods'],['Free','to start'],['No ads','ever']].map(([n,l],idx) => (
                 <React.Fragment key={l}>
                   {idx > 0 && <div style={{ width:1, height:24, background:'rgba(255,255,255,0.08)' }}/>}
                   <div style={{ textAlign:'center' }}>
-                    <p style={{ fontSize:13, fontWeight:800, color:'#2DD4BF', margin:0, fontFamily:'ui-monospace,monospace' }}>{n}</p>
+                    <p style={{ fontSize:13, fontWeight:800, color:'#2DD4BF', margin:0 }}>{n}</p>
                     <p style={{ fontSize:9.5, fontWeight:600, color:'rgba(255,255,255,0.3)', margin:0, textTransform:'uppercase', letterSpacing:'0.04em' }}>{l}</p>
                   </div>
                 </React.Fragment>
@@ -566,101 +561,10 @@ const CaloryTrackerPro = () => {
             </div>
           </div>
 
-          {/* Auth options */}
-          <Card style={{ marginBottom:16 }}>
-            <p style={{ fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'rgba(255,255,255,0.3)', margin:'0 0 14px' }}>
-              Sign in to continue
-            </p>
-            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-
-              {/* Email — primary */}
-              <PrimaryBtn onClick={() => handleLogin('email')} style={{ display:'flex', alignItems:'center', gap:12, textAlign:'left' }}>
-                <div style={{ width:32, height:32, borderRadius:8, background:'rgba(255,255,255,0.15)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                  <Mail size={15} color="white"/>
-                </div>
-                <span style={{ flex:1 }}>Continue with Email</span>
-                <ChevronRight size={16} color="rgba(255,255,255,0.5)"/>
-              </PrimaryBtn>
-
-              {/* Divider */}
-              <div style={{ display:'flex', alignItems:'center', gap:12, margin:'2px 0' }}>
-                <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.06)' }}/>
-                <span style={{ fontSize:11, fontWeight:600, color:'rgba(255,255,255,0.2)', letterSpacing:'0.05em' }}>OR</span>
-                <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.06)' }}/>
-              </div>
-
-              {/* Google */}
-              <GhostBtn onClick={() => handleLogin('google')}>
-                <div style={{ width:32, height:32, borderRadius:8, background:'white', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                  </svg>
-                </div>
-                Continue with Google
-              </GhostBtn>
-
-              {/* Phone */}
-              <GhostBtn onClick={() => handleLogin('phone')}>
-                <div style={{ width:32, height:32, borderRadius:8, background:'rgba(45,212,191,0.1)', border:'1px solid rgba(45,212,191,0.2)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                  <Phone size={14} color="#2DD4BF"/>
-                </div>
-                Continue with Phone
-              </GhostBtn>
-            </div>
-          </Card>
-
-          {/* Guest */}
-          <button onClick={() => handleLogin('guest')}
-            style={{ width:'100%', padding:'12px', borderRadius:12, background:'none', border:'none', color:'rgba(255,255,255,0.32)', fontSize:13, fontWeight:600, cursor:'pointer', marginBottom:8 }}>
-            Continue as guest →
-          </button>
-
-          {/* Sign up */}
-          <p style={{ textAlign:'center', fontSize:13, color:'rgba(255,255,255,0.35)', marginBottom:14 }}>
-            Don&apos;t have an account?{' '}
-            <button
-              onClick={() => { setIsNewUser(true); setAuthMethod('email'); setAuthStep('signup'); }}
-              style={{ background:'none', border:'none', color:'#2DD4BF', fontWeight:700, fontSize:13, cursor:'pointer', padding:0 }}>
-              Sign up free
-            </button>
-          </p>
-
-          <p style={{ textAlign:'center', fontSize:11, color:'rgba(255,255,255,0.15)' }}>
-            By continuing you agree to our Terms &amp; Privacy Policy
-          </p>
-        </div>
-      </AuthShell>
-    );
-  }
-
-  // -- EMAIL SIGN IN / SIGN UP -----------------------------------------------
-  if (authStep === 'signup' && authMethod === 'email') {
-    return (
-      <AuthShell>
-        <div style={{ flex:1, display:'flex', flexDirection:'column', padding:'0 20px 32px' }}>
-
-          {/* Back */}
-          <button onClick={() => { setAuthStep('login'); setIsNewUser(false); }}
-            style={{ background:'none', border:'none', color:'rgba(255,255,255,0.4)', fontSize:13, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', gap:6, padding:'20px 0 0', alignSelf:'flex-start' }}>
-            <ChevronRight size={14} style={{ transform:'rotate(180deg)' }}/> Back
-          </button>
-
-          {/* Heading */}
-          <div style={{ padding:'32px 0 28px' }}>
-            <h1 style={{ fontSize:28, fontWeight:900, color:'white', margin:'0 0 6px', letterSpacing:'-0.5px' }}>
-              {isNewUser ? 'Create account' : 'Welcome back'}
-            </h1>
-            <p style={{ fontSize:14, color:'rgba(255,255,255,0.4)', margin:0 }}>
-              {isNewUser ? 'Start your fitness journey today' : 'Sign in to continue'}
-            </p>
-          </div>
-
-          <Card>
-            {/* Tab toggle */}
-            <div style={{ display:'flex', background:'rgba(255,255,255,0.04)', borderRadius:10, padding:4, marginBottom:20, border:'1px solid rgba(255,255,255,0.06)' }}>
+          {/* Auth card */}
+          <Card style={{ marginBottom:12 }}>
+            {/* Sign In / Sign Up toggle */}
+            <div style={{ display:'flex', background:'rgba(255,255,255,0.04)', borderRadius:10, padding:4, marginBottom:18, border:'1px solid rgba(255,255,255,0.06)' }}>
               {[{label:'Sign In',val:false},{label:'Sign Up',val:true}].map(t => (
                 <button key={t.label} onClick={() => setIsNewUser(t.val)}
                   style={{
@@ -676,18 +580,23 @@ const CaloryTrackerPro = () => {
               ))}
             </div>
 
-            <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+            {/* Email fields */}
+            <div style={{ display:'flex', flexDirection:'column', gap:12, marginBottom:14 }}>
               {isNewUser && (
                 <Field label="Full Name">
-                  <Input type="text" placeholder="Your full name" onChange={e => setUser(u => ({...u, name: e.target.value}))} />
+                  <Input type="text" placeholder="Your full name"
+                    onChange={e => setUser(u => ({...u, name: e.target.value}))} />
                 </Field>
               )}
               <Field label="Email">
-                <Input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+                <Input type="email" placeholder="you@example.com"
+                  value={email} onChange={e => setEmail(e.target.value)} />
               </Field>
               <Field label="Password">
                 <div style={{ position:'relative' }}>
-                  <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} style={{ paddingRight:44 }}/>
+                  <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••"
+                    value={password} onChange={e => setPassword(e.target.value)}
+                    style={{ paddingRight:44 }}/>
                   <button onClick={() => setShowPassword(v => !v)}
                     style={{ position:'absolute', right:14, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', color:'rgba(255,255,255,0.3)', cursor:'pointer', padding:0 }}>
                     {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
@@ -701,14 +610,53 @@ const CaloryTrackerPro = () => {
               )}
             </div>
 
-            <PrimaryBtn onClick={handleEmailAuth} disabled={loading} style={{ marginTop:20 }}>
-              {loading ? 'Please wait…' : isNewUser ? 'Create Account' : 'Sign In'}
+            <PrimaryBtn onClick={handleEmailAuth} disabled={loading} style={{ marginBottom:14 }}>
+              {loading ? 'Please wait...' : isNewUser ? 'Create Account' : 'Sign In'}
             </PrimaryBtn>
+
+            {/* Divider */}
+            <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:14 }}>
+              <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.06)' }}/>
+              <span style={{ fontSize:11, fontWeight:600, color:'rgba(255,255,255,0.2)', letterSpacing:'0.05em' }}>OR</span>
+              <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.06)' }}/>
+            </div>
+
+            {/* Google */}
+            <GhostBtn onClick={() => handleLogin('google')} style={{ marginBottom:10 }}>
+              <div style={{ width:32, height:32, borderRadius:8, background:'white', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+              </div>
+              Continue with Google
+            </GhostBtn>
+
+            {/* Phone */}
+            <GhostBtn onClick={() => handleLogin('phone')}>
+              <div style={{ width:32, height:32, borderRadius:8, background:'rgba(45,212,191,0.1)', border:'1px solid rgba(45,212,191,0.2)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <Phone size={14} color="#2DD4BF"/>
+              </div>
+              Continue with Phone
+            </GhostBtn>
           </Card>
+
+          {/* Guest */}
+          <button onClick={() => handleLogin('guest')}
+            style={{ width:'100%', padding:'12px', borderRadius:12, background:'none', border:'none', color:'rgba(255,255,255,0.32)', fontSize:13, fontWeight:600, cursor:'pointer', marginBottom:8 }}>
+            Continue as guest
+          </button>
+
+          <p style={{ textAlign:'center', fontSize:11, color:'rgba(255,255,255,0.15)' }}>
+            By continuing you agree to our Terms &amp; Privacy Policy
+          </p>
         </div>
       </AuthShell>
     );
   }
+
 
   // -- PHONE OTP -------------------------------------------------------------
   if (authStep === 'otp') {
@@ -1281,6 +1229,7 @@ const CaloryTrackerPro = () => {
           </div>
 
         </div>
+      </div>
       </div>
     );
   };
