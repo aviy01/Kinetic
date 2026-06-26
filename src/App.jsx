@@ -5,7 +5,6 @@ import {
   TrendingUp,
   Zap,
   User,
-  Mail,
   Eye,
   EyeOff,
   Menu,
@@ -19,6 +18,21 @@ import {
   Plus,
   X,
   ChevronRight,
+  ChevronDown,
+  Bell,
+  Lock,
+  Info,
+  Utensils,
+  Droplets,
+  BarChart3,
+  Lightbulb,
+  Megaphone,
+  ShieldCheck,
+  Bug,
+  Target,
+  Trash2,
+  FileText,
+  MessageCircle,
 } from 'lucide-react';
 
 // App icon, embedded directly as a base64 data URI so the whole app stays
@@ -286,6 +300,43 @@ const Card = ({ children, style }) => (
   </div>
 );
 
+// Light-themed toggle switch used in the Profile > Settings sub-panels.
+const Toggle = ({ checked, onChange }) => (
+  <button
+    onClick={() => onChange(!checked)}
+    role="switch"
+    aria-checked={checked}
+    style={{
+      width: 44, height: 26, borderRadius: 999, padding: 3, flexShrink: 0,
+      background: checked ? '#0D9488' : '#E2E8F0',
+      border: 'none', cursor: 'pointer', transition: 'background 0.18s',
+      display: 'flex', alignItems: 'center', justifyContent: checked ? 'flex-end' : 'flex-start',
+    }}>
+    <div style={{
+      width: 20, height: 20, borderRadius: '50%', background: 'white',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.25)', transition: 'transform 0.18s',
+    }}/>
+  </button>
+);
+
+// A single labeled row with a toggle, used inside the settings sub-panels.
+// `icon` is a lucide-react icon component (not an emoji), rendered inside a
+// small colored chip so it matches the rest of the app's icon treatment.
+const SettingRow = ({ icon: Icon, color = '#0D9488', label, sub, checked, onChange }) => (
+  <div className="flex items-center gap-3 p-3.5 rounded-2xl" style={{ background:'#F8FAFB' }}>
+    {Icon && (
+      <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: color + '18' }}>
+        <Icon size={16} color={color} />
+      </div>
+    )}
+    <div className="flex-1 text-left min-w-0">
+      <p className="text-sm font-bold text-gray-800">{label}</p>
+      {sub && <p className="text-xs text-gray-400">{sub}</p>}
+    </div>
+    <Toggle checked={checked} onChange={onChange} />
+  </div>
+);
+
 // --- Main Component -----------------------------------------------------------
 
 const CaloryTrackerProInner = () => {
@@ -299,6 +350,16 @@ const CaloryTrackerProInner = () => {
   const [loading,    setLoading]    = useState(false);
   const [isNewUser,  setIsNewUser]  = useState(false); // toggle between Sign In / Sign Up
   const [editingProfile, setEditingProfile] = useState(false); // show edit profile form
+  const [settingsPanel, setSettingsPanel] = useState(null); // null | 'notifications' | 'privacy' | 'about'
+  const [aboutItem, setAboutItem] = useState(null); // null | 'terms' | 'privacy-policy'
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [contactMessage, setContactMessage] = useState('');
+  const [notifPrefs, setNotifPrefs] = useState({
+    mealReminders: true, waterReminders: true, dailySummary: true, tips: false, marketing: false,
+  });
+  const [privacyPrefs, setPrivacyPrefs] = useState({
+    analytics: true, crashReports: true, personalizedTips: true,
+  });
   const [onboardingStep, setOnboardingStep] = useState('basics'); // basics | body | goal
 
   // -- User profile ----------------------------------------------------------
@@ -504,6 +565,16 @@ const CaloryTrackerProInner = () => {
     a.download = `CaloryTracker_Report_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
+  };
+
+  const handleSendSupportEmail = () => {
+    const body = contactMessage.trim() || '(no message entered)';
+    const subject = 'Kinetic Support';
+    const mailtoUrl =
+      `mailto:aviy340@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoUrl;
+    setShowContactModal(false);
+    setContactMessage('');
   };
 
   // ===========================================================================
@@ -1993,26 +2064,192 @@ const CaloryTrackerProInner = () => {
           <div className="bg-white rounded-3xl p-5 mb-4" style={{ boxShadow:'0 4px 20px rgba(0,0,0,0.07)' }}>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">App</p>
             <p className="text-lg font-extrabold text-gray-800 mb-3">Settings</p>
-            <div className="space-y-1">
-              {[
-                { icon:'🔔', label:'Notifications',  sub:'Meal reminders & alerts',    color:'#F97316' },
-                { icon:'🔒', label:'Privacy',         sub:'Data & security settings',   color:'#0D9488' },
-                { icon:'ℹ️', label:'About Kinetic',   sub:'Version 1.0.0',              color:'#6366F1' },
-              ].map(s => (
-                <button key={s.label}
-                  className="w-full flex items-center gap-3 p-3.5 rounded-2xl transition active:scale-98"
-                  style={{ background:'#F8FAFB' }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
-                    style={{ background:s.color+'18' }}>
-                    {s.icon}
+
+            <div className="space-y-2">
+
+              {/* -- NOTIFICATIONS -- */}
+              <div className="rounded-2xl overflow-hidden" style={{ background:'#F8FAFB' }}>
+                <button onClick={() => setSettingsPanel(p => p === 'notifications' ? null : 'notifications')}
+                  className="w-full flex items-center gap-3 p-3.5 transition active:scale-98">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background:'#F9731618' }}>
+                    <Bell size={18} color="#F97316" />
                   </div>
                   <div className="flex-1 text-left">
-                    <p className="text-sm font-bold text-gray-800">{s.label}</p>
-                    <p className="text-xs text-gray-400">{s.sub}</p>
+                    <p className="text-sm font-bold text-gray-800">Notifications</p>
+                    <p className="text-xs text-gray-400">Meal reminders & alerts</p>
                   </div>
-                  <ChevronRight size={16} color="#D1D5DB" />
+                  <ChevronDown size={16} color="#9CA3AF"
+                    style={{ transition:'transform 0.2s', transform: settingsPanel === 'notifications' ? 'rotate(180deg)' : 'rotate(0deg)' }} />
                 </button>
-              ))}
+                {settingsPanel === 'notifications' && (
+                  <div className="px-3.5 pb-3.5 space-y-2">
+                    <SettingRow icon={Utensils} color="#F97316" label="Meal reminders" sub="Nudge me to log breakfast, lunch & dinner"
+                      checked={notifPrefs.mealReminders}
+                      onChange={v => setNotifPrefs(p => ({ ...p, mealReminders: v }))} />
+                    <SettingRow icon={Droplets} color="#3B82F6" label="Water reminders" sub="Hourly nudges to log water intake"
+                      checked={notifPrefs.waterReminders}
+                      onChange={v => setNotifPrefs(p => ({ ...p, waterReminders: v }))} />
+                    <SettingRow icon={BarChart3} color="#0D9488" label="Daily summary" sub="A wrap-up of your day, every evening"
+                      checked={notifPrefs.dailySummary}
+                      onChange={v => setNotifPrefs(p => ({ ...p, dailySummary: v }))} />
+                    <SettingRow icon={Lightbulb} color="#EAB308" label="Tips & insights" sub="Occasional nutrition tips based on your log"
+                      checked={notifPrefs.tips}
+                      onChange={v => setNotifPrefs(p => ({ ...p, tips: v }))} />
+                    <SettingRow icon={Megaphone} color="#8B5CF6" label="Product updates" sub="News about new features (rare)"
+                      checked={notifPrefs.marketing}
+                      onChange={v => setNotifPrefs(p => ({ ...p, marketing: v }))} />
+                    <p className="text-xs text-gray-400 px-1 pt-1">
+                      Notifications are simulated in this demo — no push notifications are actually sent.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* -- PRIVACY -- */}
+              <div className="rounded-2xl overflow-hidden" style={{ background:'#F8FAFB' }}>
+                <button onClick={() => setSettingsPanel(p => p === 'privacy' ? null : 'privacy')}
+                  className="w-full flex items-center gap-3 p-3.5 transition active:scale-98">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background:'#0D948818' }}>
+                    <Lock size={18} color="#0D9488" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-bold text-gray-800">Privacy</p>
+                    <p className="text-xs text-gray-400">Data & security settings</p>
+                  </div>
+                  <ChevronDown size={16} color="#9CA3AF"
+                    style={{ transition:'transform 0.2s', transform: settingsPanel === 'privacy' ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                </button>
+                {settingsPanel === 'privacy' && (
+                  <div className="px-3.5 pb-3.5 space-y-2">
+                    <SettingRow icon={BarChart3} color="#0D9488" label="Usage analytics" sub="Help us improve by sharing anonymous usage data"
+                      checked={privacyPrefs.analytics}
+                      onChange={v => setPrivacyPrefs(p => ({ ...p, analytics: v }))} />
+                    <SettingRow icon={Bug} color="#EF4444" label="Crash reports" sub="Automatically send crash diagnostics"
+                      checked={privacyPrefs.crashReports}
+                      onChange={v => setPrivacyPrefs(p => ({ ...p, crashReports: v }))} />
+                    <SettingRow icon={Target} color="#6366F1" label="Personalized tips" sub="Use my logged meals to tailor daily tips"
+                      checked={privacyPrefs.personalizedTips}
+                      onChange={v => setPrivacyPrefs(p => ({ ...p, personalizedTips: v }))} />
+
+                    <div className="pt-2 space-y-2">
+                      <button onClick={handleExportData}
+                        className="w-full flex items-center gap-3 p-3.5 rounded-2xl transition active:scale-98"
+                        style={{ background:'white' }}>
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background:'#0D948818' }}>
+                          <Download size={16} color="#0D9488" />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className="text-sm font-bold text-gray-800">Export my data</p>
+                          <p className="text-xs text-gray-400">Download a CSV of your activity</p>
+                        </div>
+                        <ChevronRight size={16} color="#D1D5DB" />
+                      </button>
+                      <button onClick={() => { if (window.confirm('Delete your account and all local data? This cannot be undone.')) { setAuthStep('login'); } }}
+                        className="w-full flex items-center gap-3 p-3.5 rounded-2xl transition active:scale-98"
+                        style={{ background:'#FEF2F2' }}>
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background:'#FECACA' }}>
+                          <Trash2 size={16} color="#EF4444" />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className="text-sm font-bold" style={{ color:'#EF4444' }}>Delete account</p>
+                          <p className="text-xs" style={{ color:'#F87171' }}>Permanently remove your data</p>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* -- ABOUT -- */}
+              <div className="rounded-2xl overflow-hidden" style={{ background:'#F8FAFB' }}>
+                <button onClick={() => setSettingsPanel(p => p === 'about' ? null : 'about')}
+                  className="w-full flex items-center gap-3 p-3.5 transition active:scale-98">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background:'#6366F118' }}>
+                    <Info size={18} color="#6366F1" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-bold text-gray-800">About Kinetic</p>
+                    <p className="text-xs text-gray-400">Version 1.0.0</p>
+                  </div>
+                  <ChevronDown size={16} color="#9CA3AF"
+                    style={{ transition:'transform 0.2s', transform: settingsPanel === 'about' ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                </button>
+                {settingsPanel === 'about' && (
+                  <div className="px-3.5 pb-3.5 space-y-2">
+                    <div className="flex items-center gap-3 p-4 rounded-2xl" style={{ background:'#F0FDF9', border:'1.5px solid #99F6E4' }}>
+                      <img src={APP_ICON_DATA_URI} alt="Kinetic" className="w-12 h-12 rounded-xl shrink-0" />
+                      <div>
+                        <p className="text-sm font-extrabold text-gray-800">Kinetic</p>
+                        <p className="text-xs text-gray-500">Version 1.0.0 · Build 2026.06</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+
+                      {/* Terms of Service — expandable */}
+                      <div className="rounded-2xl overflow-hidden" style={{ background:'white' }}>
+                        <button onClick={() => setAboutItem(i => i === 'terms' ? null : 'terms')}
+                          className="w-full flex items-center gap-3 p-3.5 transition active:scale-98">
+                          <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background:'#6366F118' }}>
+                            <FileText size={16} color="#6366F1" />
+                          </div>
+                          <p className="flex-1 text-left text-sm font-bold text-gray-800">Terms of Service</p>
+                          <ChevronDown size={16} color="#D1D5DB"
+                            style={{ transition:'transform 0.2s', transform: aboutItem === 'terms' ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                        </button>
+                        {aboutItem === 'terms' && (
+                          <div className="px-3.5 pb-4 space-y-2.5 text-xs text-gray-500 leading-relaxed">
+                            <p><span className="font-bold text-gray-700">1. Using Kinetic.</span> Kinetic is provided to help you log meals, water intake, and exercise for personal, non-commercial use. You're responsible for the accuracy of what you log.</p>
+                            <p><span className="font-bold text-gray-700">2. Not medical advice.</span> Calorie targets, BMI categories, and tips shown in the app are general estimates, not medical or nutritional advice. Talk to a qualified professional before making health decisions.</p>
+                            <p><span className="font-bold text-gray-700">3. Your account.</span> Keep your login details secure. You're responsible for activity under your account.</p>
+                            <p><span className="font-bold text-gray-700">4. Changes.</span> We may update these terms or the app's features over time.</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Privacy Policy — expandable */}
+                      <div className="rounded-2xl overflow-hidden" style={{ background:'white' }}>
+                        <button onClick={() => setAboutItem(i => i === 'privacy-policy' ? null : 'privacy-policy')}
+                          className="w-full flex items-center gap-3 p-3.5 transition active:scale-98">
+                          <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background:'#6366F118' }}>
+                            <ShieldCheck size={16} color="#6366F1" />
+                          </div>
+                          <p className="flex-1 text-left text-sm font-bold text-gray-800">Privacy Policy</p>
+                          <ChevronDown size={16} color="#D1D5DB"
+                            style={{ transition:'transform 0.2s', transform: aboutItem === 'privacy-policy' ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                        </button>
+                        {aboutItem === 'privacy-policy' && (
+                          <div className="px-3.5 pb-4 space-y-2.5 text-xs text-gray-500 leading-relaxed">
+                            <p><span className="font-bold text-gray-700">What we store.</span> Meals, water, exercise, and profile details (age, height, weight, goal) you enter, kept on this device for this demo.</p>
+                            <p><span className="font-bold text-gray-700">Toggles in this app.</span> The Notifications and Privacy switches above control what you'd be opted into in a production version of Kinetic.</p>
+                            <p><span className="font-bold text-gray-700">Sharing.</span> Your data isn't sold or shared with advertisers.</p>
+                            <p><span className="font-bold text-gray-700">Your control.</span> Use Export my data above to download your activity, or Delete account to remove it.</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Contact support — opens an in-app dialog */}
+                      <button onClick={() => setShowContactModal(true)}
+                        className="w-full flex items-center gap-3 p-3.5 rounded-2xl transition active:scale-98"
+                        style={{ background:'white' }}>
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background:'#6366F118' }}>
+                          <MessageCircle size={16} color="#6366F1" />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className="text-sm font-bold text-gray-800">Contact support</p>
+                          <p className="text-xs text-gray-400">aviy340@gmail.com</p>
+                        </div>
+                        <ChevronRight size={16} color="#D1D5DB" />
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-gray-400 text-center pt-1">
+                      Made for healthier habits
+                    </p>
+                  </div>
+                )}
+              </div>
+
             </div>
           </div>
 
@@ -2024,6 +2261,61 @@ const CaloryTrackerProInner = () => {
           </button>
 
         </div>
+
+        {/* -- CONTACT SUPPORT MODAL -- */}
+        {showContactModal && (
+          <div
+            onClick={() => setShowContactModal(false)}
+            style={{
+              position:'fixed', inset:0, background:'rgba(15,23,42,0.5)',
+              display:'flex', alignItems:'flex-end', justifyContent:'center',
+              zIndex:100,
+            }}>
+            <div
+              onClick={e => e.stopPropagation()}
+              className="bg-white w-full rounded-t-3xl p-5"
+              style={{ maxWidth: 480, boxShadow:'0 -8px 32px rgba(0,0,0,0.2)' }}>
+              <div className="w-10 h-1 rounded-full bg-gray-200 mx-auto mb-4" />
+
+              <div className="flex items-center gap-3 mb-1">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background:'#6366F118' }}>
+                  <MessageCircle size={18} color="#6366F1" />
+                </div>
+                <div>
+                  <p className="text-base font-extrabold text-gray-800">Contact support</p>
+                  <p className="text-xs text-gray-400">We'll get back to you at the email you reply from</p>
+                </div>
+              </div>
+
+              <p className="text-xs font-bold text-gray-500 mt-4 mb-1.5 uppercase tracking-wide">Your message</p>
+              <textarea
+                value={contactMessage}
+                onChange={e => setContactMessage(e.target.value)}
+                placeholder="What's going on? The more detail, the faster we can help."
+                rows={5}
+                className="w-full px-4 py-3 rounded-2xl text-sm focus:outline-none resize-none"
+                style={{ background:'#F8FAFB', border:'1.5px solid #E5E7EB' }}
+              />
+
+              <p className="text-xs text-gray-400 mt-2 mb-4 px-1">
+                This opens your email app with the message ready to send to aviy340@gmail.com — you can edit it before sending.
+              </p>
+
+              <div className="flex gap-3">
+                <button onClick={() => { setShowContactModal(false); setContactMessage(''); }}
+                  className="flex-1 py-3.5 rounded-2xl font-bold transition active:scale-95"
+                  style={{ background:'#F1F5F9', color:'#6B7280' }}>
+                  Cancel
+                </button>
+                <button onClick={handleSendSupportEmail}
+                  className="flex-1 py-3.5 rounded-2xl font-bold text-white transition active:scale-95"
+                  style={{ background:'linear-gradient(135deg,#6366F1,#4F46E5)', boxShadow:'0 4px 12px rgba(99,102,241,0.3)' }}>
+                  Open Email
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
