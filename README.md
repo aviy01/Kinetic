@@ -1,6 +1,7 @@
 # 🎯 CaloryTracker Pro
 
 A **professional mobile-first web application** for comprehensive nutrition and fitness tracking with real-time calorie calculations, exercise logging, and progress monitoring.
+**https://kineticcalorytracker-psi.vercel.app/**
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
