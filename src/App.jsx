@@ -7,6 +7,7 @@ import {
   User,
   Eye,
   EyeOff,
+  Mail,
   Menu,
   LogOut,
   Settings,
@@ -216,7 +217,18 @@ const TAB_LABELS = { home: 'Home', 'log-food': 'Log Food', progress: 'Progress',
 // forms. Keeping them here means they are defined once.
 
 const AuthShell = ({ children }) => (
-  <div style={{ minHeight:'100%', background:'#0B0D0C', display:'flex', flexDirection:'column', position:'relative', overflow:'hidden', fontFamily:'-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif' }}>
+  <div style={{ minHeight:'100%', background:'#0B0D0C', display:'flex', flexDirection:'column', position:'relative', overflow:'hidden', fontFamily:"'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" }}>
+    {/* Ambient glow blobs — soft, slow-drifting depth behind the content */}
+    <div className="kinetic-blob-1" style={{
+      position:'absolute', top:-140, left:-100, width:320, height:320, borderRadius:'50%',
+      background:'radial-gradient(circle, rgba(45,212,191,0.16) 0%, rgba(45,212,191,0) 70%)',
+      filter:'blur(10px)', pointerEvents:'none',
+    }}/>
+    <div className="kinetic-blob-2" style={{
+      position:'absolute', bottom:-160, right:-120, width:360, height:360, borderRadius:'50%',
+      background:'radial-gradient(circle, rgba(99,102,241,0.14) 0%, rgba(99,102,241,0) 70%)',
+      filter:'blur(10px)', pointerEvents:'none',
+    }}/>
     {/* Faint instrument tick ring, top-right — echoes the home-screen calorie dial */}
     <svg width="340" height="340" viewBox="0 0 340 340" style={{ position:'absolute', top:-110, right:-90, pointerEvents:'none', opacity:0.5 }}>
       <circle cx="170" cy="170" r="150" fill="none" stroke="rgba(45,212,191,0.10)" strokeWidth="1" />
@@ -275,25 +287,44 @@ const ErrorBanner = ({ message, dark }) => {
   );
 };
 
-const Input = (props) => (
-  <input {...props}
-    style={{
-      width:'100%', padding:'13px 16px', borderRadius:12,
-      background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
-      color:'white', fontSize:14, fontWeight:500, outline:'none',
-      boxSizing:'border-box', ...props.style,
-    }}
-  />
+const Input = ({ icon, style, className, ...props }) => (
+  icon ? (
+    <div style={{ position:'relative' }}>
+      <span style={{ position:'absolute', left:16, top:'50%', transform:'translateY(-50%)', color:'rgba(255,255,255,0.3)', display:'flex', pointerEvents:'none' }}>
+        {icon}
+      </span>
+      <input {...props}
+        className={`kinetic-input${className ? ` ${className}` : ''}`}
+        style={{
+          width:'100%', padding:'13px 16px 13px 44px', borderRadius:12,
+          background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
+          color:'white', fontSize:14, fontWeight:500, outline:'none',
+          boxSizing:'border-box', ...style,
+        }}
+      />
+    </div>
+  ) : (
+    <input {...props}
+      className={`kinetic-input${className ? ` ${className}` : ''}`}
+      style={{
+        width:'100%', padding:'13px 16px', borderRadius:12,
+        background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
+        color:'white', fontSize:14, fontWeight:500, outline:'none',
+        boxSizing:'border-box', ...style,
+      }}
+    />
+  )
 );
 
 const PrimaryBtn = ({ children, onClick, disabled, style }) => (
-  <button onClick={onClick} disabled={disabled}
+  <button onClick={onClick} disabled={disabled} className="kinetic-btn-primary"
     style={{
       width:'100%', padding:'14px', borderRadius:12,
       background:'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
       border:'none', color:'white', fontSize:14, fontWeight:700,
       cursor:disabled?'not-allowed':'pointer', opacity:disabled?0.5:1,
       boxShadow:'0 1px 0 rgba(255,255,255,0.1) inset, 0 8px 24px rgba(13,148,136,0.25)',
+      display:'flex', alignItems:'center', justifyContent:'center', gap:8,
       transition:'all 0.15s', ...style,
     }}>
     {children}
@@ -301,7 +332,7 @@ const PrimaryBtn = ({ children, onClick, disabled, style }) => (
 );
 
 const GhostBtn = ({ children, onClick, style }) => (
-  <button onClick={onClick}
+  <button onClick={onClick} className="kinetic-btn-ghost"
     style={{
       width:'100%', padding:'13px', borderRadius:12,
       background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
@@ -313,12 +344,16 @@ const GhostBtn = ({ children, onClick, style }) => (
   </button>
 );
 
-const Card = ({ children, style }) => (
-  <div style={{
-    background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)',
-    borderRadius:20, padding:24, backdropFilter:'blur(12px)',
-    boxShadow:'0 24px 48px rgba(0,0,0,0.4)', ...style,
+const Card = ({ children, style, className }) => (
+  <div className={className} style={{
+    position:'relative', overflow:'hidden',
+    background:'rgba(255,255,255,0.035)', border:'1px solid rgba(255,255,255,0.08)',
+    borderRadius:22, padding:24, backdropFilter:'blur(16px)',
+    boxShadow:'0 24px 48px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.04) inset',
+    ...style,
   }}>
+    {/* Hairline gradient accent along the top edge */}
+    <div style={{ position:'absolute', top:0, left:24, right:24, height:1, background:'linear-gradient(90deg, transparent, rgba(45,212,191,0.5), transparent)' }} />
     {children}
   </div>
 );
@@ -546,15 +581,6 @@ const CaloryTrackerProInner = () => {
     if (method === 'guest') {
       setUser(u => ({ ...u, isGuest: true }));
       setAuthStep('onboarding');
-    } else if (method === 'google') {
-      // Google auth: simulate OAuth and land on onboarding/home
-      setLoading(true);
-      setTimeout(() => {
-        setUser(u => ({ ...u, email: 'user@gmail.com', id: genId() }));
-        setOnboardingStep('basics');
-        setAuthStep('onboarding');
-        setLoading(false);
-      }, 1000);
     }
   };
 
@@ -744,25 +770,42 @@ const CaloryTrackerProInner = () => {
         <div style={{ flex:1, display:'flex', flexDirection:'column', padding:'0 20px 32px' }}>
 
           {/* Hero */}
-          <div style={{ paddingTop:64, paddingBottom:40, textAlign:'center' }}>
-            <img src={APP_ICON_DATA_URI} alt="Kinetic"
-              style={{ width:72, height:72, borderRadius:18, margin:'0 auto 22px', display:'block', boxShadow:'0 8px 24px rgba(0,0,0,0.4)' }}
-            />
+          <div className="kinetic-fade-up" style={{ paddingTop:64, paddingBottom:36, textAlign:'center' }}>
+            <div style={{ position:'relative', width:76, height:76, margin:'0 auto 24px' }}>
+              {/* Soft glow halo behind the app icon */}
+              <div style={{
+                position:'absolute', inset:-16, borderRadius:'50%',
+                background:'radial-gradient(circle, rgba(45,212,191,0.35) 0%, rgba(45,212,191,0) 72%)',
+                filter:'blur(4px)',
+              }}/>
+              <img src={APP_ICON_DATA_URI} alt="Kinetic"
+                style={{ width:76, height:76, borderRadius:20, display:'block', position:'relative', boxShadow:'0 12px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.08)' }}
+              />
+            </div>
             <h1 style={{
-              fontSize:30, fontWeight:800, letterSpacing:'-0.6px', color:'white',
-              margin:'0 0 6px', lineHeight:1.1, fontFamily:'Georgia, "Times New Roman", serif',
+              fontSize:34, fontWeight:600, letterSpacing:'-0.5px', margin:'0 0 6px', lineHeight:1.1,
+              fontFamily:"'Fraunces', Georgia, serif",
+              background:'linear-gradient(135deg, #FFFFFF 20%, #99F6E4 100%)',
+              WebkitBackgroundClip:'text', backgroundClip:'text', color:'transparent',
             }}>Kinetic</h1>
-            <p style={{ fontSize:13, color:'rgba(255,255,255,0.38)', fontWeight:500, margin:'0 0 20px', letterSpacing:'0.01em' }}>
+            <p style={{ fontSize:13, color:'rgba(255,255,255,0.4)', fontWeight:500, margin:'0 0 22px', letterSpacing:'0.01em' }}>
               Precision nutrition tracking
             </p>
             {/* Credibility strip */}
-            <div style={{ display:'inline-flex', alignItems:'center', gap:18, padding:'10px 18px', borderRadius:12, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.06)' }}>
-              {[['100+','Indian foods'],['Free','to start'],['No ads','ever']].map(([n,l],idx) => (
+            <div style={{ display:'inline-flex', alignItems:'center', gap:4, padding:6, borderRadius:14, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)' }}>
+              {[
+                { Icon: Utensils,    n:'100+',  l:'Indian foods' },
+                { Icon: Zap,         n:'Free',  l:'to start' },
+                { Icon: ShieldCheck, n:'No ads', l:'ever' },
+              ].map(({ Icon, n, l }, idx) => (
                 <React.Fragment key={l}>
-                  {idx > 0 && <div style={{ width:1, height:24, background:'rgba(255,255,255,0.08)' }}/>}
-                  <div style={{ textAlign:'center' }}>
-                    <p style={{ fontSize:13, fontWeight:800, color:'#2DD4BF', margin:0, fontFamily:'ui-monospace,monospace' }}>{n}</p>
-                    <p style={{ fontSize:9.5, fontWeight:600, color:'rgba(255,255,255,0.3)', margin:0, textTransform:'uppercase', letterSpacing:'0.04em' }}>{l}</p>
+                  {idx > 0 && <div style={{ width:1, height:26, background:'rgba(255,255,255,0.07)' }}/>}
+                  <div style={{ display:'flex', alignItems:'center', gap:7, padding:'6px 10px' }}>
+                    <Icon size={13} color="#2DD4BF" strokeWidth={2.25} />
+                    <div style={{ textAlign:'left' }}>
+                      <p style={{ fontSize:12.5, fontWeight:800, color:'#5EEAD4', margin:0, lineHeight:1.15 }}>{n}</p>
+                      <p style={{ fontSize:9, fontWeight:600, color:'rgba(255,255,255,0.32)', margin:0, textTransform:'uppercase', letterSpacing:'0.04em', lineHeight:1.15 }}>{l}</p>
+                    </div>
                   </div>
                 </React.Fragment>
               ))}
@@ -770,22 +813,29 @@ const CaloryTrackerProInner = () => {
           </div>
 
           {/* Auth options */}
-          <Card style={{ marginBottom:16 }}>
+          <Card className="kinetic-fade-up" style={{ marginBottom:16, animationDelay:'0.08s' }}>
             <p style={{ fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'rgba(255,255,255,0.3)', margin:'0 0 14px' }}>
               Sign in to continue
             </p>
 
-            {/* Sign In / Sign Up toggle */}
-            <div style={{ display:'flex', background:'rgba(255,255,255,0.04)', borderRadius:10, padding:4, marginBottom:16, border:'1px solid rgba(255,255,255,0.06)' }}>
+            {/* Sign In / Sign Up toggle — sliding pill indicator */}
+            <div style={{ position:'relative', display:'flex', background:'rgba(255,255,255,0.04)', borderRadius:10, padding:4, marginBottom:16, border:'1px solid rgba(255,255,255,0.06)' }}>
+              <div aria-hidden="true" style={{
+                position:'absolute', top:4, bottom:4, left:4,
+                width:'calc(50% - 4px)',
+                transform: isNewUser ? 'translateX(100%)' : 'translateX(0)',
+                background:'linear-gradient(135deg,#14B8A6,#0D9488)', borderRadius:8,
+                boxShadow:'0 4px 12px rgba(13,148,136,0.3)',
+                transition:'transform 0.25s cubic-bezier(0.16,1,0.3,1)',
+              }}/>
               {[{label:'Sign In',val:false},{label:'Sign Up',val:true}].map(t => (
                 <button key={t.label} onClick={() => setIsNewUser(t.val)}
                   style={{
-                    flex:1, padding:'10px', borderRadius:8, border:'none',
-                    background: isNewUser === t.val ? 'linear-gradient(135deg,#14B8A6,#0D9488)' : 'none',
-                    color: isNewUser === t.val ? 'white' : 'rgba(255,255,255,0.35)',
+                    position:'relative', zIndex:1, flex:1, padding:'10px', borderRadius:8, border:'none',
+                    background:'none',
+                    color: isNewUser === t.val ? 'white' : 'rgba(255,255,255,0.4)',
                     fontSize:13, fontWeight:700, cursor:'pointer',
-                    boxShadow: isNewUser === t.val ? '0 4px 12px rgba(13,148,136,0.3)' : 'none',
-                    transition:'all 0.2s',
+                    transition:'color 0.2s',
                   }}>
                   {t.label}
                 </button>
@@ -798,15 +848,15 @@ const CaloryTrackerProInner = () => {
             <div style={{ display:'flex', flexDirection:'column', gap:14, marginBottom:16 }}>
               {isNewUser && (
                 <Field label="Full Name">
-                  <Input type="text" placeholder="Your full name" value={user.name} onChange={e => setUser(u => ({...u, name: e.target.value}))} />
+                  <Input icon={<User size={16}/>} type="text" placeholder="Your full name" value={user.name} onChange={e => setUser(u => ({...u, name: e.target.value}))} />
                 </Field>
               )}
               <Field label="Email">
-                <Input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+                <Input icon={<Mail size={16}/>} type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} />
               </Field>
               <Field label="Password">
                 <div style={{ position:'relative' }}>
-                  <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} style={{ paddingRight:44 }}/>
+                  <Input icon={<Lock size={16}/>} type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} style={{ paddingRight:44 }}/>
                   <button onClick={() => setShowPassword(v => !v)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                     style={{ position:'absolute', right:14, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', color:'rgba(255,255,255,0.3)', cursor:'pointer', padding:0 }}>
@@ -821,39 +871,24 @@ const CaloryTrackerProInner = () => {
                 // nothing. It's now bound to state and checked in
                 // handleEmailAuth before an account can be created.
                 <Field label="Confirm Password">
-                  <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+                  <Input icon={<Lock size={16}/>} type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
                 </Field>
               )}
             </div>
 
             <PrimaryBtn onClick={handleEmailAuth} disabled={loading}>
-              {loading ? 'Please wait…' : isNewUser ? 'Create Account' : 'Sign In'}
+              {loading ? 'Please wait…' : (
+                <>
+                  {isNewUser ? 'Create Account' : 'Sign In'}
+                  <ChevronRight size={16} strokeWidth={2.5} />
+                </>
+              )}
             </PrimaryBtn>
-
-            {/* Divider */}
-            <div style={{ display:'flex', alignItems:'center', gap:12, margin:'18px 0 14px' }}>
-              <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.06)' }}/>
-              <span style={{ fontSize:11, fontWeight:600, color:'rgba(255,255,255,0.2)', letterSpacing:'0.05em' }}>OR</span>
-              <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.06)' }}/>
-            </div>
-
-            {/* Google */}
-            <GhostBtn onClick={() => handleLogin('google')}>
-              <div style={{ width:32, height:32, borderRadius:8, background:'white', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-              </div>
-              Continue with Google
-            </GhostBtn>
           </Card>
 
           {/* Guest */}
-          <button onClick={() => handleLogin('guest')}
-            style={{ width:'100%', padding:'12px', borderRadius:12, background:'none', border:'none', color:'rgba(255,255,255,0.32)', fontSize:13, fontWeight:600, cursor:'pointer', marginBottom:8 }}>
+          <button onClick={() => handleLogin('guest')} className="kinetic-btn-ghost kinetic-fade-up"
+            style={{ width:'100%', padding:'12px', borderRadius:12, background:'none', border:'1px solid transparent', color:'rgba(255,255,255,0.4)', fontSize:13, fontWeight:600, cursor:'pointer', marginBottom:8, animationDelay:'0.14s' }}>
             Continue as guest →
           </button>
 
@@ -2554,21 +2589,19 @@ const CaloryTrackerProInner = () => {
   );
 };
 
-// --- Mobile-width canvas wrapper ------------------------------------------------
-// FIX: an earlier pass pinned this to a centered, shadowed, rounded "phone
-// card" on anything wider than a phone — which is exactly what a reviewer
-// (rightly) pushes back on: it doesn't fill the screen, it just floats a
-// small mobile-shaped box in a sea of dead background on a laptop, tablet,
-// or desktop browser. That's the opposite of "responsive."
+// --- Mobile-width canvas wrapper -------------------------------------------
+// This app's screens are single-column and mobile-first (bottom tab bar,
+// full-bleed cards, no internal max-width). Rendered truly edge-to-edge on
+// a wide desktop window, that single column just stretches — inputs and
+// buttons span the whole monitor, text lines run far past a readable
+// measure, and the bottom nav spreads out into five isolated icons. That's
+// not "responsive," it's the mobile layout breaking under a viewport it
+// was never designed for.
 //
-// This app's screens are single-column (mobile-first) and each one already
-// sets its own full-width background — nothing here constrains their width.
-// So the correct fix is simply: render them full-bleed, always, on every
-// device and every window size. On a phone that's the native app. On a
-// laptop/desktop it behaves like an ordinary responsive website — the
-// background fills the browser window edge-to-edge and the single-column
-// content flows naturally inside it, rather than being boxed into a
-// separate "device" floating on top of the real page.
+// The fix lives in index.css: #root is capped at a phone-width column and
+// centered, with the ambient background filling the rest of the viewport
+// on anything wider. On an actual phone the frame *is* the viewport, so
+// nothing changes there — this only affects tablet/laptop/desktop.
 const CaloryTrackerPro = () => <CaloryTrackerProInner />;
 
 export default CaloryTrackerPro;
