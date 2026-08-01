@@ -9,20 +9,54 @@
 }
 
 html,
-body,
-#root {
+body {
   height: 100%;
   width: 100%;
   overflow-x: hidden;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Ambient backdrop behind the app frame on screens wider than a phone. */
+  background: radial-gradient(circle at 50% 0%, #1b2321 0%, #0a0c0b 55%, #060706 100%);
+}
+
+/*
+ * This is a mobile-first, single-column product (it has a bottom tab bar
+ * and full-bleed screens by design). That's fine on an actual phone, but
+ * rendered edge-to-edge in a wide desktop browser window it stretches every
+ * input, button and line of text across the full width, which is what
+ * reads as "broken" rather than "responsive": inputs the width of a
+ * monitor, a bottom nav spread across 1600px, line lengths way past
+ * anything readable. The fix isn't a novelty phone mockup, it's the same
+ * pattern most mobile-first web apps (and this app's own screenshots) use:
+ * cap the content at a phone-sized column, center it, and let the ambient
+ * background fill the rest of the viewport. On an actual phone the frame
+ * is exactly the viewport width, so nothing changes there.
+ */
+#root {
+  min-height: 100%;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+  /* `transform` gives this element a containing block of its own, so
+     position:fixed children (bottom nav, modals) anchor to the frame
+     instead of the full browser window. No visual effect by itself. */
+  transform: translateZ(0);
   background-color: #f3f4f6;
+  overflow-x: hidden;
+}
+
+@media (min-width: 481px) {
+  #root {
+    min-height: 100vh;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 30px 80px rgba(0, 0, 0, 0.55);
+  }
 }
 
 * {
@@ -35,4 +69,99 @@ textarea,
 button {
   -webkit-user-select: text;
   user-select: text;
+}
+
+/* =============================================================================
+   Kinetic design system additions — inline styles (used throughout this app)
+   can't express :hover/:focus/keyframes, so the interactive polish lives here
+   instead and is opted into via className on the shared components.
+   ========================================================================== */
+
+/* Baseline: every button gets *some* feedback, even ones without a specific
+   .kinetic-btn-* class (bottom nav, icon buttons, etc). */
+button:not(:disabled) {
+  transition: opacity 0.15s ease, transform 0.05s ease;
+}
+button:not(:disabled):active {
+  transform: scale(0.98);
+}
+button:not(.kinetic-btn-primary):not(.kinetic-btn-ghost):not(:disabled):hover {
+  opacity: 0.88;
+}
+
+/* Primary CTA — lifts and glows brighter instead of just dimming. */
+.kinetic-btn-primary:not(:disabled) {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+.kinetic-btn-primary:not(:disabled):hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.14) inset, 0 12px 28px rgba(13,148,136,0.38);
+}
+.kinetic-btn-primary:not(:disabled):active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* Ghost / secondary buttons — subtle border + tint brighten. */
+.kinetic-btn-ghost:not(:disabled) {
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+}
+.kinetic-btn-ghost:not(:disabled):hover {
+  background: rgba(255,255,255,0.07) !important;
+  border-color: rgba(255,255,255,0.16) !important;
+}
+
+/* Text inputs / selects — glowing teal focus ring instead of the browser default. */
+.kinetic-input,
+.kinetic-select {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.kinetic-input:hover,
+.kinetic-select:hover {
+  border-color: rgba(255,255,255,0.16);
+}
+.kinetic-input:focus,
+.kinetic-select:focus {
+  border-color: rgba(45,212,191,0.55) !important;
+  background: rgba(45,212,191,0.05) !important;
+  box-shadow: 0 0 0 4px rgba(45,212,191,0.12);
+}
+
+/* Gentle staggered entrance for auth-screen content. */
+@keyframes kineticFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.kinetic-fade-up {
+  animation: kineticFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Slow-drifting ambient glow blobs behind the auth screens. */
+@keyframes kineticDrift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(18px, -14px) scale(1.08); }
+}
+@keyframes kineticDrift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-16px, 16px) scale(1.05); }
+}
+.kinetic-blob-1 { animation: kineticDrift1 14s ease-in-out infinite; }
+.kinetic-blob-2 { animation: kineticDrift2 17s ease-in-out infinite; }
+
+/* Thin, low-contrast scrollbars that fit the dark theme (WebKit + Firefox). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kinetic-fade-up, .kinetic-blob-1, .kinetic-blob-2 {
+    animation: none !important;
+  }
 }
