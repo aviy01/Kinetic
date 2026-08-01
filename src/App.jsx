@@ -2522,7 +2522,10 @@ const CaloryTrackerProInner = () => {
       {(renderTab[currentTab] ?? renderHome)()}
 
       {/* Bottom navigation — always visible */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 shadow-2xl z-40">
+      {/* FIX: added safe-area-inset-bottom padding so the nav isn't
+          overlapped by a real phone's home-indicator bar. */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 shadow-2xl z-40"
+        style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
         {TAB_LIST.map(tab => {
           const tabIcon = {
             home:      <Home size={22} />,
@@ -2552,70 +2555,20 @@ const CaloryTrackerProInner = () => {
 };
 
 // --- Mobile-width canvas wrapper ------------------------------------------------
-// This app is built for mobile. On an actual phone the browser viewport IS the
-// device, so there's nothing to do. On a desktop/laptop browser, the viewport
-// is much wider than a phone, so the layout used to stretch edge-to-edge and
-// look like a website instead of an app.
+// FIX: an earlier pass pinned this to a centered, shadowed, rounded "phone
+// card" on anything wider than a phone — which is exactly what a reviewer
+// (rightly) pushes back on: it doesn't fill the screen, it just floats a
+// small mobile-shaped box in a sea of dead background on a laptop, tablet,
+// or desktop browser. That's the opposite of "responsive."
 //
-// Below a breakpoint (we use 768px, a common tablet/phone cutoff) we render
-// CaloryTrackerProInner exactly as before, full width — this covers real
-// phones and resized mobile device-toolbars in dev tools.
-//
-// Above that breakpoint, we pin the app to a fixed mobile-width column
-// (390px — close to a modern Android/iPhone) centered on a plain background,
-// with no bezel, shadow, or notch decoration. This keeps testing on a laptop
-// consistent with what a phone user would see, without dressing it up as a
-// fake device mockup.
-
-const DEVICE_WIDTH  = 390;
-const BREAKPOINT    = 768; // px — below this we assume a real phone viewport
-
-const useIsDesktop = () => {
-  const [isDesktop, setIsDesktop] = useState(
-    typeof window !== 'undefined' ? window.innerWidth >= BREAKPOINT : false
-  );
-  useEffect(() => {
-    const onResize = () => setIsDesktop(window.innerWidth >= BREAKPOINT);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-  return isDesktop;
-};
-
-const CaloryTrackerPro = () => {
-  const isDesktop = useIsDesktop();
-
-  if (!isDesktop) {
-    // Real phone (or a narrow window) — render full-bleed, no frame.
-    return <CaloryTrackerProInner />;
-  }
-
-  // Desktop / laptop — pin to a fixed mobile-width canvas (no bezel/notch
-  // decoration, just a plain background) so testing stays consistent
-  // without the layout stretching to fill the whole window.
-  return (
-    <div style={{
-      minHeight: '100vh', width: '100%',
-      display: 'flex', justifyContent: 'center',
-      background: '#E5E7EB',
-    }}>
-      {/* Scrollable viewport — this is the actual "screen" the app renders into.
-          `transform` here is load-bearing, not cosmetic: per the CSS spec, a
-          `position: fixed` descendant anchors to the nearest ancestor with a
-          transform (or a few other properties) instead of the real browser
-          viewport. Without this, the app's fixed bottom nav bar would ignore
-          this canvas entirely and stick to the laptop window's bottom edge. */}
-      <div style={{
-        width: DEVICE_WIDTH, minHeight: '100vh',
-        overflowY: 'auto', overflowX: 'hidden',
-        position: 'relative', WebkitOverflowScrolling: 'touch',
-        transform: 'translateZ(0)',
-        flexShrink: 0,
-      }}>
-        <CaloryTrackerProInner />
-      </div>
-    </div>
-  );
-};
+// This app's screens are single-column (mobile-first) and each one already
+// sets its own full-width background — nothing here constrains their width.
+// So the correct fix is simply: render them full-bleed, always, on every
+// device and every window size. On a phone that's the native app. On a
+// laptop/desktop it behaves like an ordinary responsive website — the
+// background fills the browser window edge-to-edge and the single-column
+// content flows naturally inside it, rather than being boxed into a
+// separate "device" floating on top of the real page.
+const CaloryTrackerPro = () => <CaloryTrackerProInner />;
 
 export default CaloryTrackerPro;
