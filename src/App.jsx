@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Home,
   Apple,
@@ -33,6 +33,7 @@ import {
   Trash2,
   FileText,
   MessageCircle,
+  AlertCircle,
 } from 'lucide-react';
 
 // App icon, embedded directly as a base64 data URI so the whole app stays
@@ -245,12 +246,34 @@ const AuthShell = ({ children }) => (
   </div>
 );
 
-const Field = ({ label, children }) => (
+const Field = ({ label, children, error }) => (
   <div>
     <p style={{ fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'rgba(255,255,255,0.35)', marginBottom:8 }}>{label}</p>
     {children}
+    {error && (
+      <p role="alert" style={{ fontSize:12, fontWeight:600, color:'#FCA5A5', margin:'6px 0 0' }}>{error}</p>
+    )}
   </div>
 );
+
+// Inline, non-blocking replacement for window.alert(). Used across the auth,
+// onboarding and food-logging flows so validation failures are readable in
+// context (near the field/action they relate to) instead of interrupting
+// the whole page with a native browser dialog.
+const ErrorBanner = ({ message, dark }) => {
+  if (!message) return null;
+  return (
+    <div role="alert" style={{
+      display:'flex', alignItems:'flex-start', gap:10,
+      padding:'12px 14px', borderRadius:12, marginBottom:14,
+      background: dark ? 'rgba(239,68,68,0.1)' : '#FEF2F2',
+      border: dark ? '1px solid rgba(239,68,68,0.25)' : '1px solid #FECACA',
+    }}>
+      <AlertCircle size={16} color="#EF4444" style={{ flexShrink:0, marginTop:1 }} />
+      <p style={{ fontSize:13, fontWeight:600, color: dark ? '#FCA5A5' : '#B91C1C', margin:0, lineHeight:1.4 }}>{message}</p>
+    </div>
+  );
+};
 
 const Input = (props) => (
   <input {...props}
@@ -346,9 +369,14 @@ const CaloryTrackerProInner = () => {
   const [authMethod, setAuthMethod] = useState(null);    // email | google | guest
   const [email,      setEmail]      = useState('');
   const [password,   setPassword]   = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading,    setLoading]    = useState(false);
   const [isNewUser,  setIsNewUser]  = useState(false); // toggle between Sign In / Sign Up
+  const [authError,  setAuthError]  = useState('');   // inline validation/error message for the auth form
+  const [onboardingError, setOnboardingError] = useState('');
+  const [foodFormError,   setFoodFormError]   = useState('');
+  const [exerciseFormError, setExerciseFormError] = useState('');
   const [editingProfile, setEditingProfile] = useState(false); // show edit profile form
   const [settingsPanel, setSettingsPanel] = useState(null); // null | 'notifications' | 'privacy' | 'about'
   const [aboutItem, setAboutItem] = useState(null); // null | 'terms' | 'privacy-policy'
@@ -396,14 +424,83 @@ const CaloryTrackerProInner = () => {
 
   // -- Activity history (lazy init so random values are stable) -------------
   // FIX: was re-generated on every render; lazy initialiser runs only once.
-  const [activityHistory] = useState(() =>
-    Array.from({ length: 20 }, (_, i) => ({
+  // Sample data for the 19 days *before* today — there's no real history to
+  // show for a brand-new app, so this is clearly-fabricated placeholder data
+  // (see the "Sample data" label on the chart) rather than something claiming
+  // to be real. Today's entry is handled separately below, from real data.
+  const [sampleHistory] = useState(() =>
+    Array.from({ length: 19 }, (_, i) => ({
       date:             new Date(Date.now() - (19 - i) * 24 * 60 * 60 * 1000),
       caloriesConsumed: Math.floor(Math.random() * 2500) + 1500,
       caloriesBurned:   Math.floor(Math.random() * 500),
       waterIntake:      Math.floor(Math.random() * 4000) + 1000,
+      isSample:         true,
     }))
   );
+
+  // FIX: previously the whole 20-day chart (including "today") was random,
+  // so it never matched whatever the person had actually logged in Log Food
+  // / Exercise — it looked like a bug even though it was "intentional" mock
+  // data. Today's entry is now derived from real state instead.
+  const todaysEntry = useMemo(() => ({
+    date:             new Date(),
+    caloriesConsumed: Math.round(dailyData.consumedCalories),
+    caloriesBurned:   Math.round(exercises.reduce((sum, ex) => sum + ex.calories, 0)),
+    waterIntake:      dailyData.waterIntake,
+    isSample:         false,
+  }), [dailyData.consumedCalories, dailyData.waterIntake, exercises]);
+
+  const activityHistory = useMemo(
+    () => [...sampleHistory, todaysEntry],
+    [sampleHistory, todaysEntry]
+  );
+
+  // -- Persistence -------------------------------------------------------------
+  // FIX: previously nothing was saved anywhere — a refresh silently wiped the
+  // signed-in user, every logged meal/exercise, and all preferences. This is
+  // a localStorage-backed stopgap (not a real backend/auth), but it means the
+  // app now actually remembers what the person did between visits.
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem('kinetic:v1');
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved.user) setUser(saved.user);
+        if (saved.dailyData) setDailyData(saved.dailyData);
+        if (saved.foodItems) setFoodItems(saved.foodItems);
+        if (saved.exercises) setExercises(saved.exercises);
+        if (saved.notifPrefs) setNotifPrefs(saved.notifPrefs);
+        if (saved.privacyPrefs) setPrivacyPrefs(saved.privacyPrefs);
+        if (saved.currentTab) setCurrentTab(saved.currentTab);
+        // Only resume straight into the app if there's an actual signed-in
+        // user on record — otherwise fall through to the normal login screen.
+        if (saved.authStep === 'app' && saved.user && saved.user.id) {
+          setAuthStep('app');
+        }
+      }
+    } catch (err) {
+      // Corrupted or inaccessible storage (e.g. private browsing) shouldn't
+      // crash the app — just start fresh.
+      console.warn('Kinetic: could not restore saved data', err);
+    } finally {
+      setHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Skip the very first render so we don't immediately overwrite storage
+    // with default/empty state before the restore effect above has run.
+    if (!hydrated) return;
+    try {
+      window.localStorage.setItem('kinetic:v1', JSON.stringify({
+        authStep, user, dailyData, foodItems, exercises, notifPrefs, privacyPrefs, currentTab,
+      }));
+    } catch (err) {
+      console.warn('Kinetic: could not save data', err);
+    }
+  }, [hydrated, authStep, user, dailyData, foodItems, exercises, notifPrefs, privacyPrefs, currentTab]);
 
   // -- Exercise timer effect -------------------------------------------------
   useEffect(() => {
@@ -431,8 +528,20 @@ const CaloryTrackerProInner = () => {
     return              { category: 'Obese',           color: '#EF4444' };
   };
 
+  // -- ID generation -----------------------------------------------------------
+  // FIX: Math.random() was used for user/food/exercise IDs. It's not
+  // collision-safe, isn't a stable identifier format, and is a landmine the
+  // moment this data needs to sync with a real backend. crypto.randomUUID is
+  // supported in all modern evergreen browsers this app targets; the
+  // timestamp+random fallback keeps things working in older ones.
+  const genId = () =>
+    (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
   // -- Auth handlers ---------------------------------------------------------
   const handleLogin = (method) => {
+    setAuthError('');
     setAuthMethod(method);
     if (method === 'guest') {
       setUser(u => ({ ...u, isGuest: true }));
@@ -441,7 +550,7 @@ const CaloryTrackerProInner = () => {
       // Google auth: simulate OAuth and land on onboarding/home
       setLoading(true);
       setTimeout(() => {
-        setUser(u => ({ ...u, email: 'user@gmail.com', id: Math.random() }));
+        setUser(u => ({ ...u, email: 'user@gmail.com', id: genId() }));
         setOnboardingStep('basics');
         setAuthStep('onboarding');
         setLoading(false);
@@ -449,12 +558,23 @@ const CaloryTrackerProInner = () => {
     }
   };
 
+  const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
   const handleEmailAuth = () => {
-    if (!email || !password) { alert('Please fill all fields'); return; }
+    // FIX: replaced alert() (blocking, unstyled, not field-specific) with an
+    // inline banner, and added real validation instead of accepting any
+    // non-empty string as an email/password.
+    if (isNewUser && !user.name?.trim()) { setAuthError('Enter your full name.'); return; }
+    if (!email || !password) { setAuthError('Enter your email and password.'); return; }
+    if (!isValidEmail(email)) { setAuthError('Enter a valid email address.'); return; }
+    if (password.length < 8) { setAuthError('Password must be at least 8 characters.'); return; }
+    if (isNewUser && password !== confirmPassword) { setAuthError('Passwords do not match.'); return; }
+
+    setAuthError('');
     setLoading(true);
     setTimeout(() => {
       // FIX: use functional updater to avoid stale closure.
-      setUser(u => ({ ...u, email, id: Math.random() }));
+      setUser(u => ({ ...u, email, id: genId() }));
       setAuthStep('onboarding');
       setLoading(false);
     }, 1000);
@@ -462,20 +582,31 @@ const CaloryTrackerProInner = () => {
 
   const handleOnboardingSubmit = () => {
     if (!user.name || !user.gender || !user.age || !user.height || !user.weight || !user.goal) {
-      alert('Please complete all fields');
+      setOnboardingError('Please complete all fields.');
       return;
     }
+    // FIX: no bounds checking previously — a 0 or negative height/weight/age
+    // would silently produce NaN/Infinity BMI downstream instead of a clear
+    // message here where the person can actually fix it.
+    const age = Number(user.age), height = Number(user.height), weight = Number(user.weight);
+    if (!(age > 0 && age < 120))      { setOnboardingError('Enter a valid age.'); return; }
+    if (!(height > 50 && height < 300)) { setOnboardingError('Enter a valid height in cm.'); return; }
+    if (!(weight > 20 && weight < 400)) { setOnboardingError('Enter a valid weight in kg.'); return; }
+    setOnboardingError('');
     setAuthStep('app');
   };
 
   // -- Food handlers ---------------------------------------------------------
   const handleAddFood = () => {
-    if (!selectedFood || !foodQuantity) { alert('Select food and enter quantity'); return; }
-    const food     = foodDatabase.find(f => f.id === selectedFood);
+    if (!selectedFood || !foodQuantity) { setFoodFormError('Select a food and enter a quantity.'); return; }
     const quantity = parseFloat(foodQuantity);
+    if (!(quantity > 0)) { setFoodFormError('Quantity must be greater than 0.'); return; }
+    const food = foodDatabase.find(f => f.id === selectedFood);
+    if (!food) { setFoodFormError('That food could not be found — please pick it again.'); return; }
+    setFoodFormError('');
 
     const newFood = {
-      id:       Math.random(),
+      id:       genId(),
       name:     food.name,
       quantity,
       calories: food.calories * quantity,
@@ -522,6 +653,8 @@ const CaloryTrackerProInner = () => {
     const exercise = exerciseDatabase.find(e => e.id === selectedExercise);
     // FIX: guard for missing exercise entry.
     if (!exercise) return;
+    if (exerciseTimer < 1) { setExerciseFormError('Run the timer for at least a second before finishing.'); return; }
+    setExerciseFormError('');
 
     const caloriesBurned = (exercise.caloriesPerMin * exerciseTimer) / 60;
 
@@ -531,7 +664,7 @@ const CaloryTrackerProInner = () => {
     }));
 
     setExercises(prev => [...prev, {
-      id:       Math.random(),
+      id:       genId(),
       name:     exercise.name,
       duration: exerciseTimer,
       calories: caloriesBurned,
@@ -570,11 +703,33 @@ const CaloryTrackerProInner = () => {
   const handleSendSupportEmail = () => {
     const body = contactMessage.trim() || '(no message entered)';
     const subject = 'Kinetic Support';
+    // FIX: was a hardcoded personal Gmail address. A shipped product should
+    // route support to a team inbox, not one developer's personal account.
     const mailtoUrl =
-      `mailto:aviy340@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      `mailto:support@kinetic.app?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoUrl;
     setShowContactModal(false);
     setContactMessage('');
+  };
+
+  // FIX: sign-out previously just flipped the screen back to the login step —
+  // since state now persists, that alone would leave the user "logged out"
+  // visually while their session silently rehydrated on the next refresh.
+  const handleLogout = () => {
+    try { window.localStorage.removeItem('kinetic:v1'); } catch (err) { /* ignore */ }
+    setUser({ id: null, name: '', email: '', gender: '', age: '', height: '', weight: '', goal: '', isGuest: false });
+    setDailyData({ targetCalories: 2000, consumedCalories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, waterIntake: 0, waterTarget: 3000 });
+    setFoodItems([]);
+    setExercises([]);
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setAuthStep('login');
+  };
+
+  const handleDeleteAccount = () => {
+    if (!window.confirm('Delete your account and all local data? This cannot be undone.')) return;
+    handleLogout();
   };
 
   // ===========================================================================
@@ -637,11 +792,13 @@ const CaloryTrackerProInner = () => {
               ))}
             </div>
 
+            <ErrorBanner message={authError} dark />
+
             {/* Email + password fields — always visible, no extra tap required */}
             <div style={{ display:'flex', flexDirection:'column', gap:14, marginBottom:16 }}>
               {isNewUser && (
                 <Field label="Full Name">
-                  <Input type="text" placeholder="Your full name" onChange={e => setUser(u => ({...u, name: e.target.value}))} />
+                  <Input type="text" placeholder="Your full name" value={user.name} onChange={e => setUser(u => ({...u, name: e.target.value}))} />
                 </Field>
               )}
               <Field label="Email">
@@ -651,14 +808,20 @@ const CaloryTrackerProInner = () => {
                 <div style={{ position:'relative' }}>
                   <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} style={{ paddingRight:44 }}/>
                   <button onClick={() => setShowPassword(v => !v)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                     style={{ position:'absolute', right:14, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', color:'rgba(255,255,255,0.3)', cursor:'pointer', padding:0 }}>
                     {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
                   </button>
                 </div>
               </Field>
               {isNewUser && (
+                // FIX: this field previously had no value/onChange at all —
+                // whatever was typed here was discarded and never compared
+                // against the password field, so "confirm password" did
+                // nothing. It's now bound to state and checked in
+                // handleEmailAuth before an account can be created.
                 <Field label="Confirm Password">
-                  <Input type="password" placeholder="••••••••" />
+                  <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
                 </Field>
               )}
             </div>
@@ -864,6 +1027,8 @@ const CaloryTrackerProInner = () => {
                     </button>
                   ))}
                 </div>
+
+                <ErrorBanner message={onboardingError} dark />
 
                 <div style={{ display:'flex', gap:10, marginTop:4 }}>
                   <GhostBtn onClick={() => setOnboardingStep('body')} style={{ flex:1 }}>← Back</GhostBtn>
@@ -1318,6 +1483,8 @@ const CaloryTrackerProInner = () => {
               ))}
             </div>
 
+            <ErrorBanner message={foodFormError} />
+
             {/* Selected food detail */}
             {selectedFoodItem && (
               <div className="mb-4 rounded-2xl overflow-hidden"
@@ -1332,6 +1499,7 @@ const CaloryTrackerProInner = () => {
                     </div>
                   </div>
                   <button onClick={() => setSelectedFood(null)}
+                    aria-label="Clear selected food"
                     className="w-7 h-7 rounded-full flex items-center justify-center text-emerald-600"
                     style={{ background:'rgba(255,255,255,0.6)' }}>
                     <X size={14} />
@@ -1441,6 +1609,7 @@ const CaloryTrackerProInner = () => {
                         <p className="text-xs text-gray-400">kcal</p>
                       </div>
                       <button onClick={() => handleRemoveFood(food.id)}
+                        aria-label={`Remove ${food.name} from today's log`}
                         className="w-7 h-7 rounded-xl flex items-center justify-center"
                         style={{ background:'#FEF2F2', color:'#EF4444' }}>
                         <X size={14} />
@@ -1602,6 +1771,12 @@ const CaloryTrackerProInner = () => {
               <div>
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">History</p>
                 <p className="text-lg font-extrabold text-gray-800">20-Day Activity</p>
+                {/* FIX: the first 19 days are illustrative placeholder data
+                    (there's no real 19-day history for a brand-new account) —
+                    label it as such rather than implying it's real, and mark
+                    today's tile as the one that reflects what's actually
+                    been logged. */}
+                <p className="text-xs text-gray-400 mt-0.5">Sample data · today reflects your log</p>
               </div>
               <button onClick={handleExportData}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition active:scale-95"
@@ -1617,8 +1792,11 @@ const CaloryTrackerProInner = () => {
                 return (
                   <div key={idx} className="flex flex-col items-center gap-1">
                     <div className="w-full aspect-square rounded-lg flex items-center justify-center"
-                      style={{ background: `rgba(13,148,136,${opacity})` }}
-                      title={`${day.date.toLocaleDateString()}: ${day.caloriesConsumed} kcal`}>
+                      style={{
+                        background: `rgba(13,148,136,${opacity})`,
+                        boxShadow: day.isSample ? 'none' : '0 0 0 2px #0D9488',
+                      }}
+                      title={`${day.date.toLocaleDateString()}${day.isSample ? ' (sample)' : ' (today, from your log)'}: ${day.caloriesConsumed} kcal`}>
                       <p className="text-white font-bold" style={{ fontSize: 9 }}>{day.date.getDate()}</p>
                     </div>
                   </div>
@@ -1777,6 +1955,8 @@ const CaloryTrackerProInner = () => {
                   <StopCircle size={20} /> Finish
                 </button>
               </div>
+
+              <ErrorBanner message={exerciseFormError} />
 
               <button onClick={() => { setSelectedExercise(null); setIsExerciseRunning(false); setExerciseTimer(0); }}
                 className="w-full py-2.5 rounded-xl text-sm font-semibold transition active:scale-95"
@@ -2144,7 +2324,7 @@ const CaloryTrackerProInner = () => {
                         </div>
                         <ChevronRight size={16} color="#D1D5DB" />
                       </button>
-                      <button onClick={() => { if (window.confirm('Delete your account and all local data? This cannot be undone.')) { setAuthStep('login'); } }}
+                      <button onClick={handleDeleteAccount}
                         className="w-full flex items-center gap-3 p-3.5 rounded-2xl transition active:scale-98"
                         style={{ background:'#FEF2F2' }}>
                         <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background:'#FECACA' }}>
@@ -2237,7 +2417,7 @@ const CaloryTrackerProInner = () => {
                         </div>
                         <div className="flex-1 text-left">
                           <p className="text-sm font-bold text-gray-800">Contact support</p>
-                          <p className="text-xs text-gray-400">aviy340@gmail.com</p>
+                          <p className="text-xs text-gray-400">support@kinetic.app</p>
                         </div>
                         <ChevronRight size={16} color="#D1D5DB" />
                       </button>
@@ -2254,7 +2434,7 @@ const CaloryTrackerProInner = () => {
           </div>
 
           {/* -- SIGN OUT -- */}
-          <button onClick={() => setAuthStep('login')}
+          <button onClick={handleLogout}
             className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 mb-4 transition active:scale-95"
             style={{ background:'#FEF2F2', color:'#EF4444', border:'2px solid #FECACA' }}>
             <LogOut size={18} /> Sign Out
@@ -2273,6 +2453,9 @@ const CaloryTrackerProInner = () => {
             }}>
             <div
               onClick={e => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="contact-support-title"
               className="bg-white w-full rounded-t-3xl p-5"
               style={{ maxWidth: 480, boxShadow:'0 -8px 32px rgba(0,0,0,0.2)' }}>
               <div className="w-10 h-1 rounded-full bg-gray-200 mx-auto mb-4" />
@@ -2282,7 +2465,7 @@ const CaloryTrackerProInner = () => {
                   <MessageCircle size={18} color="#6366F1" />
                 </div>
                 <div>
-                  <p className="text-base font-extrabold text-gray-800">Contact support</p>
+                  <p id="contact-support-title" className="text-base font-extrabold text-gray-800">Contact support</p>
                   <p className="text-xs text-gray-400">We'll get back to you at the email you reply from</p>
                 </div>
               </div>
@@ -2298,7 +2481,7 @@ const CaloryTrackerProInner = () => {
               />
 
               <p className="text-xs text-gray-400 mt-2 mb-4 px-1">
-                This opens your email app with the message ready to send to aviy340@gmail.com — you can edit it before sending.
+                This opens your email app with the message ready to send to our support team — you can edit it before sending.
               </p>
 
               <div className="flex gap-3">
